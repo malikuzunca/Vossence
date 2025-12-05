@@ -1,6 +1,5 @@
 # 🧣 Vossence E-Ticaret Yönetim Sistemi (E-Commerce Management System)
 
-[![Lisans](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Yapım Durumu](https://img.shields.io/badge/Status-Geliştirme%20Aşamasında-orange.svg)]()
 [![Backend](https://img.shields.io/badge/Backend-C%23%2F.NET%20Core-512BD4.svg)]()
 [![ORM](https://img.shields.io/badge/Micro--ORM-Dapper-red.svg)]()
