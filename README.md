@@ -78,8 +78,8 @@ Bu yapı, teknik yeterliliğinizin ve mimari düşünce yapınızın en güçlü
 Bu proje **Malik Uzunca** tarafından geliştirilmiştir.
 
 * **GitHub:** [@malikuzunca](https://github.com/malikuzunca)
-* **LinkedIn:** [LinkedIn Profil Bağlantınız]
-* **E-posta:** [E-posta Adresiniz]
+* **LinkedIn:** [@malikuzunca](https://www.linkedin.com/in/malikuzunca/)
+* **E-posta:** [gsmalikuzunca@outlook.com]
 
 ---
 
