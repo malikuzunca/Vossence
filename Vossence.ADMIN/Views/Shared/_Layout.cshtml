@@ -1,0 +1,167 @@
+﻿@{
+    string cdnURL = ViewBag.CdnURL;
+    int systemID = Convert.ToInt32(Context.Session.GetString("_SystemID"));
+}
+
+<!DOCTYPE html>
+<html data-navigation-type="default" data-navbar-horizontal-shape="default" lang="en-US" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vossence Ticaret</title>
+    <meta name="description" content="@injectHelper.SystemGet(systemID)!.BusinessName">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="msapplication-TileImage" content="@cdnURL/Vossence/Default/@injectHelper.SystemGet(systemID)!.LogoURL">
+    <meta name="theme-color" content="#ffffff">
+
+    <link asp-append-version="true" rel="apple-touch-icon" sizes="180x180" href="/img/favicons/apple-touch-icon.png">
+    <link asp-append-version="true" rel="icon" type="image/png" sizes="32x32" href="/img/favicons/favicon-32x32.png">
+    <link asp-append-version="true" rel="icon" type="image/png" sizes="16x16" href="/img/favicons/favicon-16x16.png">
+    <link asp-append-version="true" rel="shortcut icon" type="image/x-icon" href="/img/favicons/favicon.ico">
+    <link asp-append-version="true" rel="manifest" href="/img/favicons/manifest.json">
+
+    <link asp-append-version="true" rel="preconnect" href="https://fonts.googleapis.com">
+    <link asp-append-version="true" rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link asp-append-version="true" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&amp;display=swap" rel="stylesheet">
+
+    <link asp-append-version="true" href="~/vendors/simplebar/simplebar.min.css" rel="stylesheet">
+    <link asp-append-version ="true" href="~/css/theme-rtl.min.css" type="text/css" rel="stylesheet" id="style-rtl">
+    <link asp-append-version="true" href="~/css/theme.min.css" type="text/css" rel="stylesheet" id="style-default">
+    <link asp-append-version="true" href="~/css/user-rtl.min.css" type="text/css" rel="stylesheet" id="user-style-rtl">
+    <link asp-append-version="true" href="~/css/user.min.css" type="text/css" rel="stylesheet" id="user-style-default">
+    <link asp-append-version="true" href="~/vendors/leaflet/leaflet.css" rel="stylesheet">
+    <link asp-append-version="true" href="~/vendors/leaflet.markercluster/MarkerCluster.css" rel="stylesheet">
+    <link asp-append-version="true" href="~/vendors/leaflet.markercluster/MarkerCluster.Default.css" rel="stylesheet">
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <main class="main" id="top">
+        @await Html.PartialAsync("_pNavbar")
+        <div class="content">
+            @RenderBody()
+            <footer class="footer position-absolute">
+                <div class="row g-0 justify-content-between align-items-center h-100">
+                    <div class="col-12 col-sm-auto text-center">
+                        <p class="mb-0 mt-2 mt-sm-0 text-body">
+                            <br class="d-sm-none" />@DateTime.Now.Year &copy; Tüm Hakları Saklıdır
+                        </p>
+                    </div>
+                    <div class="col-12 col-sm-auto text-center"><p class="mb-0 text-body-tertiary text-opacity-85">v1.0</p></div>
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <button class="btn btn-primary d-none" id="liveToastBtn" type="button"></button>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
+        <div class="toast fade border-primary" id="liveToast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto" id="toastCaption"></strong>
+                <button class="btn ms-2 p-0" type="button" data-bs-dismiss="toast" aria-label="Close"><span class="fa fa-times fs-7 text-black"></span></button>
+            </div>
+            <div class="toast-body" id="toastBody"></div>
+        </div>
+    </div>
+
+    <script asp-append-version="true" src="vendors/simplebar/simplebar.min.js"></script>
+    <script asp-append-version="true" src="/js/jquery.min.js"></script>
+    <script asp-append-version="true" src="/js/config.js"></script>
+    <script asp-append-version="true" src="/vendors/popper/popper.min.js"></script>
+    <script asp-append-version="true" src="/vendors/bootstrap/bootstrap.min.js"></script>
+    <script asp-append-version="true" src="/vendors/anchorjs/anchor.min.js"></script>
+    <script asp-append-version="true" src="/vendors/is/is.min.js"></script>
+    <script asp-append-version="true" src="/vendors/fontawesome/all.min.js"></script>
+    <script asp-append-version="true" src="/vendors/lodash/lodash.min.js"></script>
+    <script asp-append-version="true" src="/vendors/list.js/list.min.js"></script>
+    <script asp-append-version="true" src="/vendors/feather-icons/feather.min.js"></script>
+    <script asp-append-version="true"  src="/vendors/dayjs/dayjs.min.js"></script>
+    <script asp-append-version="true" src="/vendors/leaflet/leaflet.js"></script>
+    <script asp-append-version="true" src="/vendors/leaflet.markercluster/leaflet.markercluster.js"></script>
+    <script asp-append-version="true"  src="/vendors/leaflet.tilelayer.colorfilter/leaflet-tilelayer-colorfilter.min.js"></script>
+    <script asp-append-version="true" src="/js/phoenix.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+
+        $(document).ready(function () {
+
+        });
+
+        function newToast(caption, message, cls) {
+            $("#toastCaption").html(caption);
+            $("#toastBody").html(message);
+
+            $("#liveToastBtn").click();
+        }
+
+        function checkReturn(checkID) {
+            var checkBool = $("#" + checkID).prop("checked");
+            if (checkBool == true)
+                $("#" + checkID).prop("checked", false);
+            else
+                $("#" + checkID).prop("checked", true);
+        }
+
+        let asideTopElement = localStorage.getItem("asideTopElement");
+        let asideSubElement = localStorage.getItem("asideSubElement");
+
+        if (asideTopElement != null)
+            $("#" + asideTopElement).addClass("show");
+        if (asideSubElement != null)
+            $("#" + asideSubElement).addClass("show");
+
+        function openCls(asideTopElement, asideSubElement) {
+            localStorage.setItem("asideTopElement", asideTopElement);
+            localStorage.setItem("asideSubElement", asideSubElement);
+        }
+        
+        function spinnerApp(elementID) {
+            $("." + elementID).html(`<i class="fa fa-spinner fa-spin fa-2x"></i>`);
+            $("." + elementID).attr("disabled", true);
+        }
+
+        function spinnerRemove(elementID, btn) {
+            $("." + elementID).html(btn);
+            $("." + elementID).attr("disabled", false);
+        }
+
+        function urlPrint(elementID, lang, sType, pathURL) {
+            var link = $("#" + elementID).val();
+            let jsElement = sType == 1 ? "url_" : "_url_";
+
+            if (link != "") {
+                $.ajax({
+                    type: "POST",
+                    url: "/url-return",
+                    data: { link: link, lang: lang, sType: sType, pathURL: pathURL },
+                    datatype: "html",
+                    success: function (result) {
+                        $("#" + jsElement + lang).val(result)
+                        if (result == "")
+                            newToast("Hata", "Bu Link Kayıtlı. Linki Güncelleyiniz");
+                    },
+                    error: function () {
+                        newToast("Hata", "Bir sorun oluştu lütfen sistem yöneticinize başvurun","error");
+                    }
+                });
+            }
+            else $("#url_" + lang).val("");
+        }
+
+        class langTabItem {
+            constructor(langID, caption, shortText, content, title,description,prdCode, url) {
+                this.langID = langID;
+                this.caption = caption;
+                this.shortText = shortText;
+                this.content = content;
+                this.title = title;
+                this.description = description;
+                this.prdCode = prdCode;
+                this.url = url;
+            }
+        }
+
+    </script>
+</body>
+</html>

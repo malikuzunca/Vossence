@@ -1,0 +1,86 @@
+﻿@model tblSystemSetting
+@{
+    Layout = null;
+    string cdnURL = Model.CdnURL!.EndsWith("/") ? Model.CdnURL.Substring(0, Model.CdnURL.Length - 1) : Model.CdnURL;
+}
+
+<!DOCTYPE html>
+<html data-navigation-type="default" data-navbar-horizontal-shape="default" lang="en-US" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bu Sayfa İçin Yetkili Değilsiniz</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <link asp-append-version="true" rel="apple-touch-icon" sizes="180x180" href="/img/favicons/apple-touch-icon.png">
+    <link asp-append-version="true" rel="icon" type="image/png" sizes="32x32" href="/img/favicons/favicon-32x32.png">
+    <link asp-append-version="true" rel="icon" type="image/png" sizes="16x16" href="/img/favicons/favicon-16x16.png">
+    <link asp-append-version="true" rel="shortcut icon" type="image/x-icon" href="/img/favicons/favicon.ico">
+
+    <link asp-append-version="true" rel="preconnect" href="https://fonts.googleapis.com">
+    <link asp-append-version="true" rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link asp-append-version="true" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&amp;display=swap" rel="stylesheet">
+
+    <link asp-append-version="true" href="/vendors/simplebar/simplebar.min.css" rel="stylesheet">
+    <link asp-append-version="true" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css" rel="stylesheet">
+    <link asp-append-version="true" href="/css/theme-rtl.min.css" type="text/css" rel="stylesheet" id="style-rtl">
+    <link asp-append-version="true" href="/css/theme.min.css" type="text/css" rel="stylesheet" id="style-default">
+    <link asp-append-version="true" href="/css/user-rtl.min.css" type="text/css" rel="stylesheet" id="user-style-rtl">
+    <link asp-append-version="true" href="/css/user.min.css" type="text/css" rel="stylesheet" id="user-style-default">
+</head>
+<body>
+    <main class="main" id="top">
+        <div class="container-fluid bg-body-tertiary dark__bg-gray-1200">
+            <div class="bg-holder bg-auth-card-overlay" style="background-image:url(/img/bg/37.png);"></div>
+            <div class="row flex-center position-relative min-vh-100 g-0 py-5">
+                <div class="col-11 col-sm-10 col-xl-8">
+                    <div class="card border border-translucent auth-card">
+                        <div class="card-body pe-md-0">
+                            <div class="row align-items-center gx-0 gy-7">
+                                <div class="col-auto bg-body-highlight dark__bg-gray-1100 rounded-3 position-relative overflow-hidden auth-title-box">
+                                    <div class="bg-holder" style="background-image:url(@cdnURL/Villa/Default/adminLoginBackground.jpg);"></div>
+                                    <div class="position-relative px-4 px-lg-7 pt-7 pb-7 pb-sm-5 text-center text-md-start pb-lg-7 pb-md-7">
+                                        <img class="w250px" src="@cdnURL/Villa/Default/logo.png" alt="Transfer Yönetim Sistemi" />
+                                        <p class="text-black">Farklı ülke ve şehirlerine profesyonelce planlanmış villa kiralama hizmeti</p>
+                                        <ul class="list-unstyled mb-0 w-max-content w-md-auto">
+                                            <li class="d-flex align-items-center"><span class="uil uil-check-circle text-black me-2"></span><span class="text-black fw-semibold">Hızlı</span></li>
+                                            <li class="d-flex align-items-center"><span class="uil uil-check-circle text-black me-2"></span><span class="text-black fw-semibold">Güvenilir</span></li>
+                                            <li class="d-flex align-items-center"><span class="uil uil-check-circle text-black me-2"></span><span class="text-black fw-semibold">Gelişmiş</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="position-relative z-n1 mb-6 d-none d-md-block text-center mt-md-15">
+                                        <img class="auth-title-box-img d-dark-none" src="/img/spot-illustrations/auth.png" alt="" />
+                                        <img class="auth-title-box-img d-light-none" src="/img/spot-illustrations/auth-dark.png" alt="" />
+                                    </div>
+                                </div>
+                                <div class="col mx-auto">
+                                    <div class="auth-form-box">
+                                        <div class="text-center mb-6 mx-auto">
+                                            <i class="fa fa-exclamation-triangle fa-5x text-danger mt-2 mb-4" aria-hidden="true"></i>
+                                            <div class="mb-6"><h4 class="text-body-highlight">Bu Sayfa İçin Yetkili Değilsiniz</h4></div>
+                                            <div class="d-grid"><a class="btn btn-primary" href="/app-login"><span class="fas fa-angle-left me-2"></span>Giriş Yap</a></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script asp-append-version="true" src="/vendors/simplebar/simplebar.min.js"></script>
+    <script asp-append-version="true" src="/js/config.js"></script>
+    <script asp-append-version="true" src="/vendors/popper/popper.min.js"></script>
+    <script asp-append-version="true" src="/vendors/bootstrap/bootstrap.min.js"></script>
+    <script asp-append-version="true" src="/vendors/anchorjs/anchor.min.js"></script>
+    <script asp-append-version="true" src="/vendors/is/is.min.js"></script>
+    <script asp-append-version="true" src="/vendors/fontawesome/all.min.js"></script>
+    <script asp-append-version="true" src="/vendors/lodash/lodash.min.js"></script>
+    <script asp-append-version="true" src="/vendors/list.js/list.min.js"></script>
+    <script asp-append-version="true" src="/vendors/feather-icons/feather.min.js"></script>
+    <script asp-append-version="true" src="/vendors/dayjs/dayjs.min.js"></script>
+    <script asp-append-version="true" src="/js/phoenix.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+﻿@{
+    string cdnURL = ViewBag.CdnURL;
+    int systemID = Convert.ToInt32(Context.Session.GetString("_SystemID"));
+}
+
+<nav class="navbar navbar-vertical navbar-expand-lg">
+    <div class="collapse navbar-collapse" id="navbarVerticalCollapse">
+        <div class="navbar-vertical-content">
+            <ul class="navbar-nav flex-column" id="navbarVerticalNav">
+            
+
+                <li class="nav-item">
+                    <div class="nav-item-wrapper">
+                        <a class="nav-link dropdown-indicator label-1" href="#systemSetting" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="systemSetting">
+                            <div class="d-flex align-items-center">
+                                <div class="dropdown-indicator-icon"><span class="fas fa-caret-right"></span></div>
+                                <span class="nav-link-icon"><i class="fa fa-gear"></i></span>
+                                <span class="nav-link-text">Sistem</span>
+                            </div>
+                        </a>
+                        <div class="parent-wrapper label-1">
+                            <ul class="nav collapse parent" data-bs-parent="#topMenuCollapse" id="systemSetting">
+                                <li class="nav-item"><a class="nav-link" onclick="openCls('systemSetting')" href="/system-setting"><div class="d-flex align-items-center"> <span class="nav-link-text">Sistem Ayarları</span></div></a></li>
+                                <li class="nav-item"><a class="nav-link" onclick="openCls('systemSetting')" href="/user-management"><div class="d-flex align-items-center"> <span class="nav-link-text">Kullanıcı Yönetimi</span></div></a></li>
+                                <li class="nav-item"><a class="nav-link" onclick="openCls('systemSetting')" href="/social-medias"><div class="d-flex align-items-center"> <span class="nav-link-text">Sosyal Medya</span></div></a></li>
+                                <li class="nav-item"><a class="nav-link" onclick="openCls('systemSetting')" href="/slide-management"><div class="d-flex align-items-center"> <span class="nav-link-text">Slider</span></div></a></li>
+
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="nav-item">
+                    <div class="nav-item-wrapper">
+                        <a class="nav-link dropdown-indicator label-1" href="#cmsManagement" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="cmsManagement">
+                            <div class="d-flex align-items-center">
+                                <div class="dropdown-indicator-icon"><span class="fas fa-caret-right"></span></div>
+                                <span class="nav-link-icon"><i class="fa fa-edit"></i></span>
+                                <span class="nav-link-text">Tanımlamalar</span>
+                            </div>
+                        </a>
+                        <div class="parent-wrapper label-1">
+                            <ul class="nav collapse parent" data-bs-parent="#topMenuCollapse" id="cmsManagement">
+                                <li class="nav-item"><a class="nav-link" onclick="openCls('cmsManagement')" href="/item-management?cmsType=1"><div class="d-flex align-items-center"> <span class="nav-link-text">Üst Menü</span></div></a></li>
+                                <li class="nav-item"><a class="nav-link" onclick="openCls('cmsManagement')" href="/item-management?cmsType=2"><div class="d-flex align-items-center"> <span class="nav-link-text">Kurumsal Menü</span></div></a></li>
+                                <li class="nav-item"><a class="nav-link" onclick="openCls('cmsManagement')" href="/item-management?cmsType=3"><div class="d-flex align-items-center"> <span class="nav-link-text">Destek Menü</span></div></a></li>
+                                <li class="nav-item"><a class="nav-link" onclick="openCls('cmsManagement')" href="/item-management?cmsType=4"><div class="d-flex align-items-center"> <span class="nav-link-text">Bağımsız İçerik Sayfaları</span></div></a></li>
+                                <li class="nav-item">
+                                    <a class="nav-link dropdown-indicator collapsed" href="#nv-sss" data-bs-toggle="collapse" aria-expanded="false" aria-controls="nv-sss">
+                                        <div class="d-flex align-items-center">
+                                            <div class="dropdown-indicator-icon"><i class="fa fa-caret-right"></i></div>
+                                            <span class="nav-link-text">SSS</span>
+                                        </div>
+                                    </a>
+                                    <div class="parent-wrapper">
+                                        <ul class="nav parent collapse" id="nv-sss">
+                                            <li class="nav-item"><a class="nav-link" onclick="openCls('cmsManagement', 'nv-sss')" href="/sss-categories"><div class="d-flex align-items-center"> <span class="nav-link-text">Kategori</span></div></a></li>
+                                            <li class="nav-item"><a class="nav-link" onclick="openCls('cmsManagement', 'nv-sss')" href="/sss-posts"><div class="d-flex align-items-center"> <span class="nav-link-text">Post</span></div></a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link dropdown-indicator collapsed" href="#nv-blog" data-bs-toggle="collapse" aria-expanded="false" aria-controls="nv-blog">
+                                        <div class="d-flex align-items-center">
+                                            <div class="dropdown-indicator-icon"><i class="fa fa-caret-right"></i></div>
+                                            <span class="nav-link-text">Blog</span>
+                                        </div>
+                                    </a>
+                                    <div class="parent-wrapper">
+                                        <ul class="nav parent collapse" id="nv-blog">
+                                            <li class="nav-item"><a class="nav-link" onclick="openCls('cmsManagement', 'nv-blog')" href="/blog-categories"><div class="d-flex align-items-center"> <span class="nav-link-text">Kategori</span></div></a></li>
+                                            <li class="nav-item"><a class="nav-link" onclick="openCls('cmsManagement', 'nv-blog')" href="/blog-posts"><div class="d-flex align-items-center"> <span class="nav-link-text">Post</span></div></a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="nav-item"><a class="nav-link" onclick="openCls('cmsManagement')" href="/service-management"><div class="d-flex align-items-center"> <span class="nav-link-text">Hizmet Yönetimi</span></div></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+
+
+
+
+                <li class="nav-item">
+                    <div class="nav-item-wrapper">
+                        <a class="nav-link dropdown-indicator label-1" href="#definitionManagement" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="definitionManagement">
+                            <div class="d-flex align-items-center">
+                                <div class="dropdown-indicator-icon"><span class="fas fa-caret-right"></span></div>
+                                <span class="nav-link-icon"><i class="fa fa-list"></i></span>
+                                <span class="nav-link-text">İçerik Yönetimi</span>
+                            </div>
+                        </a>
+                        <div class="parent-wrapper label-1">
+                            <ul class="nav collapse parent" data-bs-parent="#topMenuCollapse" id="definitionManagement">
+                                <li class="nav-item"><a class="nav-link" onclick="openCls('definitionManagement')" href="/category-management"><div class="d-flex align-items-center"> <span class="nav-link-text">Kategoriler</span></div></a></li>
+                                <li class="nav-item"><a class="nav-link" onclick="openCls('definitionManagement')" href="/product-management"><div class="d-flex align-items-center"> <span class="nav-link-text">Ürünler</span></div></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+
+
+            </ul>
+        </div>
+    </div>
+    <div class="navbar-vertical-footer"></div>
+</nav>
+<nav class="navbar navbar-top fixed-top navbar-expand" id="navbarDefault">
+    <div class="collapse navbar-collapse justify-content-between">
+        <div class="navbar-logo">
+            <button class="btn navbar-toggler navbar-toggler-humburger-icon hover-bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#navbarVerticalCollapse" aria-controls="navbarVerticalCollapse" aria-expanded="false" aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
+            <a class="navbar-brand me-1 me-sm-3" href="/">
+                <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center">
+                        <img src="@cdnURL/Vossence/Default/@injectHelper.SystemGet(systemID)!.LogoURL" alt="@injectHelper.SystemGet(systemID)!.BusinessName" height="60" />
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="search-box navbar-top-search-box d-none d-lg-block" data-list='{"valueNames":["productName"]}' style="width:25rem;">
+            <div class="dropdown-menu border start-0 py-0 overflow-hidden w-100" id="headerSearchDropdown">
+                <div class="scrollbar-overlay" style="max-height: 30rem;">
+                    <div class="list pb-3"><div class="py-2" id="headerSearchBody"></div></div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <ul class="navbar-nav navbar-nav-icons flex-row">
+            <li class="nav-item">
+                <div class="theme-control-toggle fa-icon-wait px-2">
+                    <input class="form-check-input ms-0 theme-control-toggle-input" type="checkbox" data-theme-control="phoenixTheme" value="dark" id="themeControlToggle" />
+                    <label class="mb-0 theme-control-toggle-label theme-control-toggle-light" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" title="Switch theme"><span class="icon" data-feather="moon"></span></label>
+                    <label class="mb-0 theme-control-toggle-label theme-control-toggle-dark" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" title="Switch theme"><span class="icon" data-feather="sun"></span></label>
+                </div>
+            </li>
+            <li class="nav-item"><a href="/logout"><i class="fa fa-sign-out fa-2x"></i></a></li>
+        </ul>
+    </div>
+</nav>

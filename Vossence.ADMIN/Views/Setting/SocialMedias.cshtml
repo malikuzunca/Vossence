@@ -1,0 +1,241 @@
+﻿@model Tuple<List<tblSocialMedia>, string>
+
+@{
+    int iRow = 1;
+}
+@section Styles {
+    <link asp-append-version="true" rel="stylesheet" href="/vendors/sweetalert2/sweetalert2.css" />
+}
+
+<div class="mt-4">
+    <div class="row g-4">
+        <div class="col-12 col-xl-12 order-1 order-xl-0">
+            <div class="mb-9">
+                <div class="card shadow-none border mb-3" data-component-card="data-component-card">
+                    <div class="card-header p-4 border-bottom bg-body">
+                        <div class="row g-3 justify-content-between align-items-center">
+                            <div class="col-md-9"><h4 class="text-body mb-0">Sosyal Medya</h4></div>
+                            <div class="col-md-3 text-end"><a class="btn btn-sm btn-success code-btn ms-2 fw-light collapsed" data-bs-target="#socialMediaCreateCanvas" data-bs-toggle="offcanvas">Yeni</a></div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-4 code-to-copy">
+                            <div id="socialMedias" data-list='{"valueNames":["socialMedia", "link"],"page":10,"pagination":true}'>
+                                <div class="mb-4">
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="search-box"><form class="position-relative"><input class="form-control search-input search" type="search" placeholder="Aranacak Terim" aria-label="Aranacak Terim" /><span class="fas fa-search search-box-icon"></span></form></div>
+                                    </div>
+                                </div>
+                                <div class="bg-body-emphasis border-top border-bottom border-translucent position-relative top-1">
+                                    <div class="table-responsive scrollbar mx-n1 px-1">
+                                        <table class="table fs-9 mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="white-space-nowrap align-middle ps-4" scope="col">#</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-center sort" scope="col" data-sort="socialMedia">Sosyal Medya</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-center sort" scope="col" data-sort="link">Link</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-end" scope="col">İşlemler</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="list" id="products-table-body">
+                                                @if (Model.Item1.Count() > 0)
+                                                {
+                                                    foreach (var item in Model.Item1)
+                                                    {
+                                                        <tr class="position-static">
+                                                            <td class="align-middle ps-4">@iRow</td>
+                                                            <td class="socialMedia align-middle text-center ps-4" id="socialMedia_@item.SocialID">@item.Title</td>
+                                                            <td class="link align-middle text-center ps-4">@item.Link</td>
+                                                            <td class="text-end">
+                                                                <a class="btn btn-primary btn-sm btn-icon d-inline p-2" data-bs-toggle="offcanvas" data-bs-target="#socialMediaCanvas" onclick="socialMediaGet('@item.SocialID', '@item.Title', '@item.Link')"><i class="fa fa-edit"></i></a>
+                                                                <a class="btn btn-danger btn-sm btn-icon d-inline p-2" onclick="socialMediaDelete('@item.SocialID')"><i class="fa fa-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+
+                                                        iRow++;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr class="position-static">
+                                                        <td class="align-middle ps-4 text-center" colspan="4">Kayıt Bulunamadı.</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row align-items-center justify-content-between py-2 pe-0 fs-9">
+                                        <div class="col-auto d-flex"><p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p></div>
+                                        <div class="col-auto d-flex"><button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button><ul class="mb-0 pagination"></ul><button class="page-link pe-0" data-list-pagination="next"><span class="fas fa-chevron-right"></span></button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" id="socialMediaCreateCanvas" tabindex="-1" aria-labelledby="socialMediaCreateCanvasLabel">
+    <div class="offcanvas-header">
+        <h5 id="socialMediaCreateCanvasLabel">Sosyal Medya Oluştur</h5>
+        <button class="btn-close text-reset" type="button" id="socialMediaCreateCanvasCloseButton" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <hr />
+    <div class="offcanvas-body">
+        <form action="javascript:socialMediaCreate()" method="post" autocomplete="off">
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="title">Başlık</label>
+                <div class="col-sm-8"><input class="form-control" id="_title" type="text" placeholder="Başlık Giriniz" maxlength="50" required /></div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="link">Link</label>
+                <div class="col-sm-8"><input class="form-control" id="_link" type="text" placeholder="Sosyal Medya Link Giriniz" maxlength="50" required /></div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="icon">Icon</label>
+                <div class="col-sm-8"><input class="form-control" id="_icon" type="text" placeholder="Icon Giriniz" maxlength="50" required /></div>
+            </div>
+            <hr />
+            <div class="row g-3 justify-content-between align-items-center">
+                <div class="col-12 col-md text-end">
+                    <button class="btn btn-success createButton">Kaydet</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" id="socialMediaCanvas" tabindex="-1" aria-labelledby="socialMediaCanvasLabel">
+    <div class="offcanvas-header">
+        <h5 id="socialMediaCanvasLabel">Sosyal Medya</h5>
+        <button class="btn-close text-reset" type="button" id="socialMediaCanvasCloseButton" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <hr />
+    <div class="offcanvas-body">
+        <form action="javascript:socialMediaUpdate()" method="post" autocomplete="off">
+            <input type="hidden" id="socialID" />
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="title">Sosyal Medya</label>
+                <div class="col-sm-8"><input class="form-control" id="title" type="text" disabled /></div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="link">Link</label>
+                <div class="col-sm-8"><input class="form-control" id="link" type="text" placeholder="Sosyal Medya Link Giriniz" required /></div>
+            </div>
+            <hr />
+            <div class="row g-3 justify-content-between align-items-center">
+                <div class="col-12 col-md text-end">
+                    <button class="btn btn-success saveButton">Kaydet</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script asp-append-version="true" src="/vendors/sweetalert2/sweetalert2.js"></script>
+    <script>
+
+        function socialMediaGet(socialMediaID, title, link) {
+            $("#socialID").val(socialMediaID)
+            $("#title").val(title)
+            $("#link").val(link)
+        }
+        function socialMediaCreate() {    
+            let _title = $("#_title").val();
+            let _link = $("#_link").val();
+            let _icon = $("#_icon").val();
+
+            spinnerApp('createButton');
+
+            $.ajax({
+                type: "POST",
+                url: "/social-media-create",
+                data:
+                {
+                    _title: _title,
+                    _link: _link,
+                    _icon: _icon,
+               
+                },
+                datatype: "html",
+                success: function (result) {
+                    window.location.reload()
+                },
+                error: function () {
+                    $("#userCreateCanvasCloseButton").click();
+                    spinnerRemove('createButton', "Kaydet");
+                    newToast("Başarısız", "Kayıt Oluşturulamadı!", "error");
+                }
+            });
+        }
+        function socialMediaUpdate() {
+            let socialID = $("#socialID").val();
+            let title = $("#title").val();
+            let link = $("#link").val();
+
+            spinnerApp("saveButton");
+
+            $.ajax({
+                type: "POST",
+                url: "/social-media-update",
+                data: { socialID: socialID, title: title, link: link },
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1) {
+                        window.location.reload()
+                    }
+                    else {
+                        $("#socialMediaCanvasCloseButton").click()
+                        spinnerRemove("saveButton", "Kaydet");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                error: function () {
+                    spinnerRemove("saveButton", "Kaydet");
+                    newToast("Güncelleme", "Güncelleme Başarısız", "error");
+                }
+            });
+        }
+
+        function socialMediaDelete(socialMediaID) {
+            Swal.fire({
+                title: 'Uyarı',
+                text: "Kullanıcıyı silmek istediğinize emin misiniz?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet',
+                cancelButtonText: 'Hayır',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/social-media-delete",
+                        data: { socialMediaID: socialMediaID },
+                        datatype: "html",
+                        success: function (result) {
+                            if (result.resultType === 1) {
+                                window.location.reload()
+                            }
+                            else {
+                                newToast(result.resultCaption, result.resultMessage, "error");
+                            }
+                        },
+                        error: function () {
+                            newToast("Silme", "Kayıt Silinemedi", "error");
+                        }
+                    });
+                }
+            });
+        }
+
+    </script>
+}

@@ -1,0 +1,155 @@
+﻿@model Tuple<tblSystemSetting, int>
+
+<div class="mt-4">
+    <div class="row g-4">
+        <div class="col-12 col-xl-12 order-1 order-xl-0">
+            <div class="mb-9">
+                <div class="card shadow-none border my-4" data-component-card="data-component-card">
+                    <form action="javascript:systemSettingUpdate()" method="post" autocomplete="off">
+                        <div class="card-header p-4 border-bottom bg-body">
+                            <div class="row g-3 justify-content-between align-items-center">
+                                <div class="col-12 col-md">
+                                    <h4 class="text-body mb-0">Sistem Ayarları</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="p-4">
+                                <div class="mb-3 row">
+                                    <div class="row mb-2">
+                                        <label class="col-sm-3 col-form-label" for="businessName">Firma Adı</label>
+                                        <div class="col-sm-9"><input class="form-control" id="businessName" type="text" value="@Model.Item1.BusinessName" placeholder="Firma Adı Giriniz" maxlength="50" required /></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-sm-3 col-form-label" for="emailAddress">Mail Adresi</label>
+                                        <div class="col-sm-9"><input class="form-control" id="emailAddress" type="text" value="@Model.Item1.EmailAddress" placeholder="Mail Adresi Giriniz" maxlength="50" required /></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-sm-3 col-form-label" for="phoneNumber">Telefon Numarası</label>
+                                        <div class="col-sm-9"><input class="form-control" id="phoneNumber" type="text" value="@Model.Item1.PhoneNumber" placeholder="Telefon Numarası Giriniz" maxlength="50" required /></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-sm-3 col-form-label" for="wpNumber">WhatsApp Numarası</label>
+                                        <div class="col-sm-9"><input class="form-control" id="wpNumber" type="text" value="@Model.Item1.WpNumber" placeholder="WhatsApp Numarası Giriniz" maxlength="50" required /></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-sm-3 col-form-label" for="adress">Adres</label>
+                                        <div class="col-sm-9"><input class="form-control" id="adress" type="text" value="@Model.Item1.Adress" placeholder="Adres Giriniz" maxlength="500" required />
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-sm-3 col-form-label" for="productStart">Ürün Başlangıç Eki</label>
+                                        <div class="col-sm-9"><input class="form-control" id="productStart" type="text" onkeyup="startKey()" value="@Model.Item1.ProductStart" maxlength="3" placeholder="Ürün Başlangıç Eki Giriniz" required /></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-sm-3 col-form-label" for="mapURL">Google Harita Link</label>
+                                        <div class="col-sm-9"><input class="form-control" id="mapURL" type="text" value="@Model.Item1.MapURL" placeholder="Google Harita Link Giriniz" /></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-sm-3 col-form-label" for="workTime">Çalışma Zamanı</label>
+                                        <div class="col-sm-9"><input class="form-control" id="workTime" type="text" value="@Model.Item1.WorkTime" placeholder="Çalışma Zamanı Giriniz" /></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-sm-3 col-form-label" for="headCode">Head Alanı Kodları</label>
+                                        <div class="col-sm-9"><textarea class="form-control" rows="5" placeholder="Head Alanı Kodları Giriniz (Varsa)" id="headCode">@Model.Item1.HeadCode</textarea></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-sm-3 col-form-label" for="bodyCode">Body Alanı Kodları</label>
+                                        <div class="col-sm-9"><textarea class="form-control" rows="5" placeholder="Body Alanı Kodları Giriniz (Varsa)" id="bodyCode">@Model.Item1.BodyCode</textarea></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-sm-3 col-form-label" for="logo">Logo</label>
+                                        <div class="col-sm-9"><input class="form-control" id="logo" type="file" /></div>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(Model.Item1.LogoURL))
+                                    {
+                                        <div class="row mb-2">
+                                            <label class="col-sm-3 col-form-label"></label>
+                                            <div class="col-sm-9"><img src="@Model.Item1.CdnURL/Vossence/Default/@Model.Item1.LogoURL" width="150" /></div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer p-4 border-bottom bg-body">
+                            <div class="row g-3 justify-content-between align-items-center">
+                                <div class="col-12 col-md text-end">
+                                    <button class="btn btn-success saveButton">Kaydet</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        function startKey() {
+            let reservationStart = $("#productStart").val();
+            if (reservationStart.length > 3) {
+                let newStart = reservationStart.slice(0, -1);
+                $("#productStart").val(newStart)
+            }
+            else {
+                let reservationStart = $("#productStart").val();
+                $("#productStart").val(reservationStart.toUpperCase());
+            }
+        }
+
+        function systemSettingUpdate() {
+            let businessName = $("#businessName").val();
+            let emailAddress = $("#emailAddress").val();
+            let phoneNumber = $("#phoneNumber").val();
+            let wpNumber = $("#wpNumber").val();
+            let adress = $("#adress").val();
+            let productStart = $("#productStart").val();
+            let mapURL = $("#mapURL").val();
+            let workTime = $("#workTime").val();
+            let headCode = $("#headCode").val();
+            let bodyCode = $("#bodyCode").val();
+            let logo = $('#logo')[0].files;
+
+            let model = new FormData();
+
+            model.append('businessName', businessName);
+            model.append('emailAddress', emailAddress);
+            model.append('phoneNumber', phoneNumber);
+            model.append('wpNumber', wpNumber);
+            model.append('adress', adress);
+            model.append('productStart', productStart);
+            model.append('mapURL', mapURL);
+            model.append('workTime', workTime);
+            model.append('headCode', headCode);
+            model.append('bodyCode', bodyCode);
+            model.append('logo', logo[0]);
+
+            spinnerApp("saveButton")
+
+            $.ajax({
+                type: "POST",
+                url: "/system-setting-update",
+                data: model,
+                datatype: "html",
+                processData: false,
+                contentType: false,
+                success: function (result) {
+                    if (result.resultType === 1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove('saveButton', "@Model.Item2");
+                        newToast(result.resultCaption, result.resultMessage, "success");
+                    }
+                },
+                error: function () {
+                    spinnerRemove('saveButton', "@Model.Item2");
+                    newToast("@Model.Item2", "@Model.Item2", "error");
+                }
+            });
+        }
+
+    </script>
+}

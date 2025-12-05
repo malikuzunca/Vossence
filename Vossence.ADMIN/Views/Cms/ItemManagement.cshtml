@@ -1,0 +1,607 @@
+﻿@model Tuple<List<SP_CmsList>, List<tblCmsMain>>
+
+@{
+    string pathURL = Context.Request.Path.ToString().StartsWith("/") ? Context.Request.Path.ToString().Remove(0, 1) : Context.Request.Path.ToString();
+    string cdnURL = ViewBag.CdnURL;
+    string cmsType = Context.Request.Query["cmsType"]!;
+    string pageCaption = cmsType == "1" ? "Üst Menü Sayfaları" : cmsType == "2" ? "Kurumsal Menü" : cmsType == "3" ? "Destek Menü" : cmsType == "4" ? "Bağımsız İçerik Sayfaları" : "##DEVOPS##";
+    string topTabCls = "", subTabCls = "", required = "", checkCls = "", trClass = "", trIcon = "";
+
+    int topTabRow = 1, subTabRow = 1, iRow = 1;
+    bool topTabSelected = false;
+}
+
+@{
+    <link rel="stylesheet" asp-append-version="true" href="/vendors/sweetalert2/sweetalert2.css" />
+}
+
+<div class="mt-4">
+    <div class="row g-4">
+        <div class="col-12 col-xl-12 order-1 order-xl-0">
+            <div class="mb-9">
+                <div class="card shadow-none border mb-3" data-component-card="data-component-card">
+                    <div class="card-header p-4 border-bottom bg-body">
+                        <div class="row g-3 justify-content-between align-items-center">
+                            <div class="col-md-9"><h4 class="text-body mb-0">İçerik Yönetimi (@pageCaption)</h4></div>
+                            <div class="col-md-3 text-end">
+                                <a class="btn btn-sm btn-success code-btn ms-2 fw-light collapsed" data-bs-target="#itemCreateModal" data-bs-toggle="modal">Yeni</a>
+                                <a class="btn btn-sm btn-info code-btn ms-2 fw-light collapsed arrangementButton" onclick="arrangementUpdate()">Sıralama Güncelle</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-4 code-to-copy">
+                            <div id="cmsItems" data-list='{"valueNames":["content", "subContent"],"page":10,"pagination":true}'>
+                                <div class="mb-4">
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="search-box"><form class="position-relative"><input class="form-control search-input search" type="search" placeholder="Aranacak Terim" aria-label="Aranacak Terim" /><span class="fas fa-search search-box-icon"></span></form></div>
+                                    </div>
+                                </div>
+                                <div class="bg-body-emphasis border-top border-bottom border-translucent position-relative top-1">
+                                    <div class="table-responsive scrollbar mx-n1 px-1">
+                                        <table class="table fs-9 mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="white-space-nowrap align-middle ps-4" scope="col">#</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 sort" scope="col" data-sort="content">İçerik</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 sort" scope="col" data-sort="subContent">Alt İçerik</th>
+                                                    <th class="white-space-nowrap align-middle ps-4" scope="col">Durum</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-end" scope="col">İşlemler</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="list" id="products-table-body">
+                                                @if (Model.Item1.Count() > 0)
+                                                {
+                                                    foreach (var item in Model.Item1)
+                                                    {
+                                                        checkCls = item.IsActive ? "checked" : "";
+                                                        trClass = item.TranslateControl == 0 ? "danger blink" : "success";
+                                                        trIcon = item.TranslateControl == 0 ? "exclamation-triangle" : "thumbs-up";
+
+                                                        <tr>
+                                                            <td class="text-center align-middle"><input type="number" class="form-control form-control-sm w-50 arrangementCls text-center" data-id="@item.CmsID" value="@item.Arrangement" /></td>
+                                                            <td class="content align-middle">@item.CmsName</td>
+                                                            <td class="subContent align-middle">@item.CmsSubGet</td>
+                                                            <td class="align-middle">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" onchange="isActiveUpdate('@item.CmsID', 'item_@item.CmsID')" id="item_@item.CmsID" type="checkbox" @checkCls />
+                                                                    <label class="form-check-label" for="item_@item.CmsID"></label>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-end">
+                                                                <a class="btn btn-primary btn-sm btn-icon d-inline p-2" title="Güncelle" onclick="itemGet(@item.CmsID)" data-bs-toggle="modal" data-bs-target="#itemUpdateModal"><i class="fa fa-edit"></i></a>
+                                                                <a class="btn btn-warning btn-sm btn-icon d-inline p-2" title="Galeri" href="/item-gallery?cmsID=@item.CmsID"><i class="fa fa-image"></i></a>
+                                                                <a class="btn btn-danger btn-sm btn-icon d-inline p-2" title="Sil" onclick="itemDelete(@item.CmsID)"><i class="fa fa-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+
+                                                        iRow++;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr class="position-static">
+                                                        <td class="align-middle ps-4 text-center" colspan="6">Kayıt bulunamadı!</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row align-items-center justify-content-between py-2 pe-0 fs-9">
+                                        <div class="col-auto d-flex"><p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p></div>
+                                        <div class="col-auto d-flex"><button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button><ul class="mb-0 pagination"></ul><button class="page-link pe-0" data-list-pagination="next"><span class="fas fa-chevron-right"></span></button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form action="javascript:itemCreate()" method="post" autocomplete="off">
+    <div class="modal fade" id="itemCreateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Kayıt Oluştur</h5>
+                    <button class="btn p-1" type="button" data-bs-dismiss="modal" id="itemCreateModalCloseButton" aria-label="Close"><span class="fas fa-times fs-9"></span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body p-0">
+                        <div class="p-4">
+                            <div class="mb-3 row">
+                                <div class="col-md-12">
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-3">
+                                            <div class="form-floating mb-3">
+                                                <select class="form-select" id="cmsType" required>
+                                                    <option value="">Seçiniz</option>
+                                                    <option value="1">Üst Menü Sayfaları</option>
+                                                    <option value="2">Footer Kurumsal Menü</option>
+                                                    <option value="3">Footer Destek Menü</option>
+                                                    <option value="4">Bağımsız İçerik Sayfaları</option>
+                                                </select>
+                                                <label for="cmsType">Sayfa Tipi</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-floating mb-3">
+                                                <select class="form-select" id="cmsSub" required>
+                                                    <option value="0">Ana Menü</option>
+                                                    @foreach (var item in Model.Item2)
+                                                    {
+                                                        <option value="@item.CmsID">@item.CmsName</option>
+                                                    }
+                                                </select>
+                                                <label for="cmsSub">Bağlantılı Menü</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-floating mb-3">
+                                                <input class="form-control" id="cmsName" type="text" placeholder="Sayfa Adı Giriniz" maxlength="200" required />
+                                                <label for="cmsName">Sayfa Adı</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-floating mb-3">
+                                                <input class="form-control" id="externalLink" onkeyup="externalLinkChange(1)" type="text" placeholder="Dış Link Giriniz" maxlength="500" />
+                                                <label for="externalLink">Dış Link</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 mb-3 langPanel"><h4 class="border-bottom">Dil Çevirileri</h4></div>
+                                <div class="langPanel">
+                                    <ul class="nav nav-underline fs-9 mb-3 pb-5" id="langTab" role="tablist">
+                                        @foreach (var item in injectHelper.LangList())
+                                        {
+                                            topTabCls = topTabRow == 1 ? "active" : "";
+                                            topTabSelected = topTabRow == 1 ? true : false;
+
+                                            <li class="nav-item px-3">
+                                                <a class="nav-link @topTabCls" id="langTab_@item.LangID" data-bs-toggle="tab" href="#lang_@item.LangID" role="tab" aria-controls="lang_@item.LangID" aria-selected="@topTabSelected">
+                                                    @item.LangName
+                                                </a>
+                                            </li>
+                                            topTabRow++;
+                                        }
+                                    </ul>
+                                    <div class="tab-content mt-5" id="langTabContent">
+                                        @foreach (var item in injectHelper.LangList())
+                                        {
+                                            subTabCls = subTabRow == 1 ? "show active" : "";
+                                            required = subTabRow == 1 ? "required" : "";
+
+                                            <div class="langCreateLoop tab-pane fade @subTabCls" data-lang="@item.LangID" id="lang_@item.LangID" role="tabpanel" aria-labelledby="langTab_@item.LangID">
+                                                <div class="row mb-2 langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-2 col-form-label" for="caption_@item.LangID">Sayfa Adı</label>
+                                                    <div class="col-sm-10"><input class="form-control langRowNonCaption_@item.LangID" onblur="urlPrint('caption_@item.LangID', @item.LangID, 1, '@pathURL')" id="caption_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="200" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-2 col-form-label" for="title_@item.LangID">Title</label>
+                                                    <div class="col-sm-10"><input class="form-control langRowNonTitle_@item.LangID" id="title_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="200" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-2 col-form-label" for="description_@item.LangID">Description</label>
+                                                    <div class="col-sm-10"><textarea class="tinymce langRowNonEditor_@item.LangID" id="description_@item.LangID" name="description_@item.LangID" data-tinymce="{}" placeholder="@item.LangName Dili İçin Çeviri Giriniz"></textarea></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-2 col-form-label" for="url_@item.LangID">URL</label>
+                                                    <div class="col-sm-10"><input class="form-control langRowNonURL_@item.LangID" id="url_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="300" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-2 col-form-label" for="content_@item.LangID">Sayfa İçerik</label>
+                                                    <div class="col-sm-10"><textarea class="tinymce langRowNonEditor_@item.LangID" id="content_@item.LangID" name="content_@item.LangID" data-tinymce="{}" placeholder="@item.LangName Dili İçin Çeviri Giriniz"></textarea></div>
+                                                </div>
+                                            </div>
+                                            subTabRow++;
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary saveButton" type="submit">Kaydet</button>
+                    <button class="btn btn-outline-danger" type="button" data-bs-dismiss="modal">İptal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form action="javascript:itemUpdate()" method="post" autocomplete="off">
+    <div class="modal fade" id="itemUpdateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Kayıt Güncelle</h5>
+                    <button class="btn p-1" type="button" data-bs-dismiss="modal" id="itemUpdateModalCloseButton" aria-label="Close"><span class="fas fa-times fs-9"></span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body p-0">
+                        <div class="p-4">
+                            <div class="mb-3 row">
+                                <div class="col-md-12">
+                                    <input type="hidden" id="_cmsID" />
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-3">
+                                            <div class="form-floating mb-3">
+                                                <select class="form-select" id="_cmsType" required>
+                                                    <option value="">Seçiniz</option>
+                                                    <option value="1">Üst Menü Sayfaları</option>
+                                                    <option value="2">Footer Kurumsal Menü</option>
+                                                    <option value="3">Footer Destek Menü</option>
+                                                    <option value="4">Bağımsız İçerik Sayfaları</option>
+                                                </select>
+                                                <label for="_cmsType">Sayfa Tipi</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-floating mb-3">
+                                                <select class="form-select" id="_cmsSub" required>
+                                                    <option value="0">Ana Menü</option>
+                                                    @foreach (var item in Model.Item2)
+                                                    {
+                                                        <option value="@item.CmsID">@item.CmsName</option>
+                                                    }
+                                                </select>
+                                                <label for="_cmsSub">Bağlantılı Menü</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-floating mb-3">
+                                                <input class="form-control" id="_cmsName" type="text" placeholder="Sayfa Adı Giriniz" maxlength="200" required />
+                                                <label for="_cmsName">Sayfa Adı</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-floating mb-3">
+                                                <input class="form-control" id="_externalLink" onkeyup="externalLinkChange(1)" type="text" placeholder="Dış Link Giriniz" maxlength="500" />
+                                                <label for="_externalLink">Dış  Link Adı</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @{
+                                    topTabRow = 1;
+                                    subTabRow = 1;
+                                }
+                                <div class="mt-3 mb-3 langPanel"><h4 class="border-bottom">Dil Çevirileri</h4></div>
+                                <div class="langPanel">
+                                    <ul class="nav nav-underline fs-9 mb-3 pb-5" id="_langTab" role="tablist">
+                                        @foreach (var item in injectHelper.LangList())
+                                        {
+                                            topTabCls = topTabRow == 1 ? "active" : "";
+                                            topTabSelected = topTabRow == 1 ? true : false;
+
+                                            <li class="nav-item px-3">
+                                                <a class="nav-link @topTabCls" id="_langTab_@item.LangID" data-bs-toggle="tab" href="#_lang_@item.LangID" role="tab" aria-controls="_lang_@item.LangID" aria-selected="@topTabSelected">
+                                                    @item.LangName
+                                                </a>
+                                            </li>
+                                            topTabRow++;
+                                        }
+                                    </ul>
+                                    <div class="tab-content mt-5" id="_langTabContent">
+                                        @foreach (var item in injectHelper.LangList())
+                                        {
+                                            subTabCls = subTabRow == 1 ? "show active" : "";
+                                            required = subTabRow == 1 ? "required" : "";
+
+                                            <div class="langUpdateLoop tab-pane fade @subTabCls" data-lang="@item.LangID" id="_lang_@item.LangID" role="tabpanel" aria-labelledby="langTab_@item.LangID">
+                                                <div class="row mb-2 langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-2 col-form-label" for="_caption_@item.LangID">Sayfa Adı</label>
+                                                    <div class="col-sm-10"><input class="form-control langRowNonCaption_@item.LangID" onblur="urlPrint('_caption_@item.LangID', @item.LangID, 2, '@pathURL')" id="_caption_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="200" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-2 col-form-label" for="_title_@item.LangID">Title</label>
+                                                    <div class="col-sm-10"><input class="form-control langRowNonTitle_@item.LangID" id="_title_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="200" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-2 col-form-label" for="_description_@item.LangID">Description</label>
+                                                    <div class="col-sm-10"><textarea class="tinymce langRowNonEditor_@item.LangID" id="_description_@item.LangID" name="_description_@item.LangID" data-tinymce="{}" placeholder="@item.LangName Dili İçin Çeviri Giriniz"></textarea></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-2 col-form-label" for="_url_@item.LangID">URL</label>
+                                                    <div class="col-sm-10"><input class="form-control langRowNonURL_@item.LangID" id="_url_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="300" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-2 col-form-label" for="_content_@item.LangID">Sayfa İçerik</label>
+                                                    <div class="col-sm-10"><textarea class="tinymce langRowNonEditor_@item.LangID" id="_content_@item.LangID" name="_content_@item.LangID" data-tinymce="{}" placeholder="@item.LangName Dili İçin Çeviri Giriniz"></textarea></div>
+                                                </div>
+                                            </div>
+                                            subTabRow++;
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary saveButton" type="submit">Kaydet</button>
+                    <button class="btn btn-outline-danger" type="button" data-bs-dismiss="modal">İptal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script asp-append-version="true" src="/vendors/sweetalert2/sweetalert2.js"></script>
+    <script asp-append-version="true" src="/vendors/tinymce/tinymce.min.js"></script>
+    <script>
+
+        function externalLinkChange(processType) {
+            let langID = 0;
+            let loopCls = processType == 1 ? "langCreateLoop" : "langUpdateLoop"
+            let externalLink = processType == 1 ? $("#externalLink").val() : $("#_externalLink").val();
+
+            $('.' + loopCls).each(function (index, element) {
+                if (index == 0) langID = $(this).attr("data-lang")
+            });
+
+            $('.' + loopCls).each(function (index, element) {
+                let langID = $(this).attr("data-lang");
+
+                if (externalLink.length > 0) {
+                    $(".langRowNonTitle_" + langID).attr("required", false)
+                    $(".langRowNonDescription_" + langID).attr("required", false)
+                    $(".langRowNonURL_" + langID).attr("required", false)
+                    $(".langRowNonEditor_" + langID).attr("required", false)
+
+                    $(".nonExternalLinkGroup").addClass("d-none")
+                }
+                else {
+                    $(".langRowNonTitle_" + langID).attr("required", true)
+                    $(".langRowNonDescription_" + langID).attr("required", true)
+                    $(".langRowNonURL_" + langID).attr("required", true)
+                    $(".langRowNonEditor_" + langID).attr("required", true)
+
+                    $(".nonExternalLinkGroup").removeClass("d-none")
+                }
+            });
+        }
+
+        function itemCreate() {
+            let cmsID = 0;
+            let cmsType = $("#cmsType").val();
+            let cmsSub = $("#cmsSub").val();
+            let cmsName = $("#cmsName").val();
+            let externalLink = $("#externalLink").val();
+
+            let loopCount = 0, list = new Array(), iRow = 1;
+            let lang = "", translate = "";
+
+            $('.langCreateLoop').each(function () {
+                let langID = $(this).attr("data-lang");
+                let caption = $("#caption_" + langID).val();
+                let content = $("#content_" + langID).val();
+                let title = $("#title_" + langID).val();
+                let description = $("#description_" + langID).val();
+                let url = $("#url_" + langID).val();
+
+                if (caption != "")
+                    list.push(new langTabItem(langID, caption, null, content, title, description, null, url))
+                iRow++;
+            });
+
+            spinnerApp('saveButton');
+
+            $.ajax({
+                type: "POST",
+                url: "/item-app",
+                data: { cmsID: cmsID, cmsType: cmsType, cmsSub: cmsSub, cmsName: cmsName, externalLink: externalLink, list: list },
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove('saveButton', "Kaydet");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                error: function () {
+                    spinnerRemove('saveButton', "Kaydet");
+                    newToast("Hata", "Bir hata oluştur lütfen sistem yöneticinize başvurun!", "error");
+                }
+            });
+        }
+
+        function itemGet(cmsID) {
+            $.ajax({
+                type: "Get",
+                url: "/cms-item-get",
+                data: { cmsID: cmsID },
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    $('.langCreateLoop').each(function (index, element) {
+                        let langID = $(this).attr("data-lang");
+
+                        $("#caption_" + langID).val("");
+                        $("#title_" + langID).val("");
+                        $("#url_" + langID).val("");
+                        tinyMCE.get('content_' + langID).setContent("");
+                        tinyMCE.get('description_' + langID).setContent("");
+                    });
+
+                    $('.langUpdateLoop').each(function (index, element) {
+                        let langID = $(this).attr("data-lang");
+
+                        $("#_caption_" + langID).val("");
+                        $("#_title_" + langID).val("");
+                        $("#_url_" + langID).val("");
+                        tinyMCE.get('_content_' + langID).setContent("");
+                        tinyMCE.get('_description_' + langID).setContent("");
+
+                    });
+
+                    if (result.item1 != null) {
+                        $("#_cmsID").val(result.item1.cmsID)
+                        $("#_cmsType").val(result.item1.cmsType)
+                        $("#_cmsSub").val(result.item1.cmsSub)
+                        $("#_cmsName").val(result.item1.cmsName)
+                        $("#_externalURL").val(result.item1.externalURL)
+                    }
+
+                    if (result.item2.length > 0) {
+                        $.each(result.item2, function (i, item) {
+                            $("#_caption_" + item.langID).val(item.cmsSubName);
+                            $("#_title_" + item.langID).val(item.title);
+                            $("#_url_" + item.langID).val(item.url);
+                            tinyMCE.get('_content_' + item.langID).setContent(item.cmsContent != null ? item.cmsContent : "");
+                            tinyMCE.get('_description_' + item.langID).setContent(item.description != null ? item.description : "");
+
+                        });
+                    }
+                },
+                error: function () { alert("Hata") }
+            });
+        }
+
+        function itemUpdate() {
+            let cmsID = $("#_cmsID").val();
+            let cmsType = $("#_cmsType").val();
+            let cmsSub = $("#_cmsSub").val();
+            let cmsName = $("#_cmsName").val();
+            let externalLink = $("#_externalLink").val();
+
+            let loopCount = 0, list = new Array(), iRow = 1;
+            let lang = "", translate = "";
+
+            $('.langUpdateLoop').each(function () {
+                let langID = $(this).attr("data-lang");
+                let caption = $("#_caption_" + langID).val();
+                let content = $("#_content_" + langID).val();
+                let title = $("#_title_" + langID).val();
+                let description = $("#_description_" + langID).val();
+                let url = $("#_url_" + langID).val();
+
+                list.push(new langTabItem(langID, caption, null, content, title, description, null, url))
+            });
+
+            spinnerApp('saveButton');
+
+            $.ajax({
+                type: "POST",
+                url: "/item-app",
+                data: { cmsID: cmsID, cmsType: cmsType, cmsSub: cmsSub, cmsName: cmsName, externalLink: externalLink, list: list },
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove('saveButton', "Kaydet");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                error: function () {
+                    spinnerRemove('saveButton', "Kaydet");
+                    newToast("Hata", "Bir hata oluştur lütfen sistem yöneticinize başvurun!", "error");
+                }
+            });
+        }
+
+        function isActiveUpdate(cmsID, checkID) {
+            $.ajax({
+                type: "POST",
+                url: "/item-process",
+                data: { processType: 1, cmsID: cmsID },
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1) {
+                        newToast(result.resultCaption, result.resultMessage, "success");
+                    }
+                    else {
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                        checkReturn(checkID);
+                    }
+                },
+                error: function () {
+                    newToast("Hata", "Bir hata oluştur lütfen sistem yöneticinize başvurun!", "error");
+                    checkReturn(checkID);
+                }
+            });
+        }
+
+        function arrangementUpdate() {
+            let arrangementBody = "";
+            spinnerApp('arrangementButton');
+
+            $('.arrangementCls').each(function () {
+                arrangementBody += $(this).attr("data-id") + "," + $(this).val() + "_";
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "/cms-arrangement-update",
+                data: { arrangementBody: arrangementBody },
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove('arrangementButton', "Sıralama Güncelle");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                error: function () {
+                    spinnerRemove('arrangementButton', "Sıralama Güncelle");
+                    newToast("Hata", "Bir hata oluştur lütfen sistem yöneticinize başvurun!", "error");
+                }
+            });
+        }
+
+        function itemDelete(cmsID) {
+            Swal.fire({
+                title: 'Title',
+                text: "Kayıt Silinecek Emin misiniz ?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet',
+                cancelButtonText: 'Hayır',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            }).then(function (result) {
+                if (result.value) {
+                    spinnerApp('swal2-confirm');
+                    $.ajax({
+                        type: "POST",
+                        url: "/item-process",
+                        data: { processType: 2, cmsID: cmsID },
+                        datatype: "html",
+                        success: function (result) {
+                            spinnerRemove('swal2-confirm', 'Evet');
+                            if (result.resultType === 1)
+                                window.location.reload();
+                            else {
+                                spinnerRemove('swal2-confirm', 'Evet');
+                                newToast("Hata", result);
+                            }
+                        },
+                        error: function () {
+                            spinnerRemove('swal2-confirm', 'Evet');
+                            newToast("Hata", "Bir hata oluştur lütfen sistem yöneticinize başvurun!");
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.fire({
+                        title: 'Title',
+                        text: 'İşlemi iptal ettiniz.',
+                        icon: 'error',
+                        customClass: { confirmButton: 'btn btn-primary' }
+                    });
+                }
+            });
+        }
+
+    </script>
+}

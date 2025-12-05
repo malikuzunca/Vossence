@@ -1,0 +1,578 @@
+﻿@model Tuple<List<SP_SSSCategories>,int>
+
+@{
+    string pathURL = Context.Request.Path.ToString().StartsWith("/") ? Context.Request.Path.ToString().Remove(0, 1) : Context.Request.Path.ToString();
+    string cdnURL = ViewBag.CdnURL;
+    string topTabCls = "", subTabCls = "", required = "", checkCls = "", trClass = "", trIcon = "";
+
+    int topTabRow = 1, subTabRow = 1, iRow = 1;
+    bool topTabSelected = false;
+}
+
+@{
+    <link rel="stylesheet" asp-append-version="true" href="/vendors/sweetalert2/sweetalert2.css" />
+}
+
+<div class="mt-4">
+    <div class="row g-4">
+        <div class="col-12 col-xl-12 order-1 order-xl-0">
+            <div class="mb-9">
+                <div class="card shadow-none border mb-3" data-component-card="data-component-card">
+                    <div class="card-header p-4 border-bottom bg-body">
+                        <div class="row g-3 justify-content-between align-items-center">
+                            <div class="col-md-9"><h4 class="text-body mb-0">SSS Kategori Yönetimi</h4></div>
+                            <div class="col-md-3 text-end">
+                                <a class="btn btn-sm btn-success code-btn ms-2 fw-light collapsed" data-bs-target="#itemCreateModal" data-bs-toggle="modal">Yeni</a>
+                                <a class="btn btn-sm btn-info code-btn ms-2 fw-light collapsed arrangementButton" onclick="arrangementUpdate()">Sıralama Güncelle</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-4 code-to-copy">
+                            <div id="sssCategories" data-list='{"valueNames":["sssCategoryName"],"page":10,"pagination":true}'>
+                                <div class="mb-4">
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="search-box"><form class="position-relative"><input class="form-control search-input search" type="search" placeholder="Aranacak Terim" aria-label="Aranacak Terim" /><span class="fas fa-search search-box-icon"></span></form></div>
+                                    </div>
+                                </div>
+                                <div class="bg-body-emphasis border-top border-bottom border-translucent position-relative top-1">
+                                    <div class="table-responsive scrollbar mx-n1 px-1">
+                                        <table class="table fs-9 mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="white-space-nowrap align-middle ps-4" scope="col">#</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 sort text-center" scope="col" data-sort="sssCategoryName">Kategori</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-left" scope="col">Durum</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-center" scope="col">Resim</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-end" scope="col">İşlemler</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="list" id="products-table-body">
+                                                @if (Model.Item1.Count() > 0)
+                                                {
+                                                    foreach (var item in Model.Item1)
+                                                    {
+                                                        checkCls = item.IsActive ? "checked" : "";
+                                                        trClass = item.TranslateControl == 0 ? "danger blink" : "success";
+                                                        trIcon = item.TranslateControl == 0 ? "exclamation-triangle" : "thumbs-up";
+
+                                                        <tr>
+                                                            <td class="text-center align-middle"><input type="number" class="form-control form-control-sm w-50 arrangementCls text-center" data-id="@item.SSSCategoryID" value="@item.Arrangement" /></td>
+                                                            <td class="sssCategoryName align-middle text-center">@item.SSSCategoryName</td>
+                                                            <td class="align-middle text-left">
+                                                                <div class="form-check form-switch mx-4">
+                                                                    <input class="form-check-input" onchange="isActiveUpdate('@item.SSSCategoryID', 'item_@item.SSSCategoryID')" id="item_@item.SSSCategoryID" type="checkbox" @checkCls />
+                                                                    <label class="form-check-label" for="item_@item.SSSCategoryID"></label>
+                                                                </div>
+                                                            </td>
+                                                            <td class="align-middle text-center"><img width="70" src="@cdnURL/Vossence/SSSCategories/@item.ListImage" /></td>
+                                                            <td class="text-end">
+                                                                <a class="btn btn-primary btn-sm btn-icon d-inline p-2" title="Güncelle" onclick="itemGet(@item.SSSCategoryID)" data-bs-toggle="modal" data-bs-target="#itemUpdateModal"><i class="fa fa-edit"></i></a>
+                                                                <a class="btn btn-success btn-sm btn-icon d-inline p-2" title="Liste Görsel" onclick="listImageGet(@item.SSSCategoryID, '@item.SSSCategoryName', '@item.ListImage')" data-bs-toggle="modal" data-bs-target="#itemSingleUploadModal"><i class="fa fa-image"></i></a>
+                                                                <a class="btn btn-danger btn-sm btn-icon d-inline p-2" title="Sil" onclick="itemDelete(@item.SSSCategoryID)"><i class="fa fa-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+
+                                                        iRow++;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr class="position-static">
+                                                        <td class="align-middle ps-4 text-center" colspan="6">Kayıt Bulunamadı</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row align-items-center justify-content-between py-2 pe-0 fs-9">
+                                        <div class="col-auto d-flex"><p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p></div>
+                                        <div class="col-auto d-flex"><button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button><ul class="mb-0 pagination"></ul><button class="page-link pe-0" data-list-pagination="next"><span class="fas fa-chevron-right"></span></button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form action="javascript:itemCreate()" method="post" autocomplete="off">
+    <div class="modal fade" id="itemCreateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Kayıt Oluştur</h5>
+                    <button class="btn p-1" type="button" data-bs-dismiss="modal" id="itemCreateModalCloseButton" aria-label="Close"><span class="fas fa-times fs-9"></span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body p-0">
+                        <div class="p-4">
+                            <div class="mb-3 row">
+                                <div class="col-md-12">
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-12">
+                                            <div class="form-floating mb-3">
+                                                <input class="form-control" id="sssCategoryName" type="text" placeholder="Kategori Adı Giriniz" maxlength="200" required />
+                                                <label for="sssCategoryName">Kategori Adı</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 mb-3 langPanel"><h4 class="border-bottom">Dil Çevirileri</h4></div>
+                                <div class="langPanel">
+                                    <ul class="nav nav-underline fs-9 mb-3 pb-5" id="langTab" role="tablist">
+                                        @foreach (var item in injectHelper.LangList())
+                                        {
+                                            topTabCls = topTabRow == 1 ? "active" : "";
+                                            topTabSelected = topTabRow == 1 ? true : false;
+
+                                            <li class="nav-item px-3">
+                                                <a class="nav-link @topTabCls" id="langTab_@item.LangID" data-bs-toggle="tab" href="#lang_@item.LangID" role="tab" aria-controls="lang_@item.LangID" aria-selected="@topTabSelected">
+                                                    <img src="@cdnURL/Default/flags/@item.Flag" width="40" height="25" />  @item.LangName
+                                                </a>
+                                            </li>
+                                            topTabRow++;
+                                        }
+                                    </ul>
+                                    <div class="tab-content mt-5" id="langTabContent">
+                                        @foreach (var item in injectHelper.LangList())
+                                        {
+                                            subTabCls = subTabRow == 1 ? "show active" : "";
+                                            required = subTabRow == 1 ? "required" : "";
+
+                                            <div class="langCreateLoop tab-pane fade @subTabCls" data-lang="@item.LangID" id="lang_@item.LangID" role="tabpanel" aria-labelledby="langTab_@item.LangID">
+                                                <div class="row mb-2 langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-3 col-form-label" for="caption_@item.LangID">Kategori Adı</label>
+                                                    <div class="col-sm-9"><input class="form-control langRowNonCaption_@item.LangID" onblur="urlPrint('caption_@item.LangID', @item.LangID, 1, '@pathURL')" id="caption_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="200" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-3 col-form-label" for="title_@item.LangID">Title</label>
+                                                    <div class="col-sm-9"><input class="form-control langRowNonTitle_@item.LangID" id="title_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="200" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-3 col-form-label" for="description_@item.LangID">Description</label>
+                                                    <div class="col-sm-9"><input class="form-control langRowNonDescription_@item.LangID" id="description_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="300" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-3 col-form-label" for="url_@item.LangID">URL</label>
+                                                    <div class="col-sm-9"><input class="form-control langRowNonURL_@item.LangID" id="url_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="300" @required /></div>
+                                                </div>
+                                            </div>
+                                            subTabRow++;
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary saveButton" type="submit">Kaydet</button>
+                    <button class="btn btn-outline-danger" type="button" data-bs-dismiss="modal">İptal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form action="javascript:itemUpdate()" method="post" autocomplete="off">
+    <div class="modal fade" id="itemUpdateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Kayıt Güncelle</h5>
+                    <button class="btn p-1" type="button" data-bs-dismiss="modal" id="itemUpdateModalCloseButton" aria-label="Close"><span class="fas fa-times fs-9"></span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body p-0">
+                        <div class="p-4">
+                            <div class="mb-3 row">
+                                <div class="col-md-12">
+                                    <input type="hidden" id="_sssCategoryID" />
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-12">
+                                            <div class="form-floating mb-3">
+                                                <input class="form-control" id="_sssCategoryName" type="text" placeholder="Kategori Adı Giriniz" maxlength="200" required />
+                                                <label for="_sssCategoryName">Kategori Adı</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @{
+                                    topTabRow = 1;
+                                    subTabRow = 1;
+                                }
+                                <div class="mt-3 mb-3 langPanel"><h4 class="border-bottom">Dil Çevirileri</h4></div>
+                                <div class="langPanel">
+                                    <ul class="nav nav-underline fs-9 mb-3 pb-5" id="_langTab" role="tablist">
+                                        @foreach (var item in injectHelper.LangList())
+                                        {
+                                            topTabCls = topTabRow == 1 ? "active" : "";
+                                            topTabSelected = topTabRow == 1 ? true : false;
+
+                                            <li class="nav-item px-3">
+                                                <a class="nav-link @topTabCls" id="_langTab_@item.LangID" data-bs-toggle="tab" href="#_lang_@item.LangID" role="tab" aria-controls="_lang_@item.LangID" aria-selected="@topTabSelected">
+                                                    @item.LangName
+                                                </a>
+                                            </li>
+                                            topTabRow++;
+                                        }
+                                    </ul>
+                                    <div class="tab-content mt-5" id="_langTabContent">
+                                        @foreach (var item in injectHelper.LangList())
+                                        {
+                                            subTabCls = subTabRow == 1 ? "show active" : "";
+                                            required = subTabRow == 1 ? "required" : "";
+
+                                            <div class="langUpdateLoop tab-pane fade @subTabCls" data-lang="@item.LangID" id="_lang_@item.LangID" role="tabpanel" aria-labelledby="langTab_@item.LangID">
+                                                <div class="row mb-2 langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-3 col-form-label" for="_caption_@item.LangID">Kategori Adı</label>
+                                                    <div class="col-sm-9"><input class="form-control langRowNonCaption_@item.LangID" onblur="urlPrint('_caption_@item.LangID', @item.LangID, 2, '@pathURL')" id="_caption_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="200" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-3 col-form-label" for="_title_@item.LangID">Title</label>
+                                                    <div class="col-sm-9"><input class="form-control langRowNonTitle_@item.LangID" id="_title_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="200" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-3 col-form-label" for="_description_@item.LangID">Description</label>
+                                                    <div class="col-sm-9"><input class="form-control langRowNonDescription_@item.LangID" id="_description_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="300" @required /></div>
+                                                </div>
+                                                <div class="row mb-2 nonExternalLinkGroup langRowNonDiv langRowNonDiv_@item.LangID">
+                                                    <label class="col-sm-3 col-form-label" for="_url_@item.LangID">URL</label>
+                                                    <div class="col-sm-9"><input class="form-control langRowNonURL_@item.LangID" id="_url_@item.LangID" type="text" placeholder="@item.LangName Dili İçin Çeviri Giriniz" maxlength="300" @required /></div>
+                                                </div>
+                                            </div>
+                                            subTabRow++;
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary saveButton" type="submit">Kaydet</button>
+                    <button class="btn btn-outline-danger" type="button" data-bs-dismiss="modal">İptal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form action="javascript:listImageApp()" method="post" autocomplete="off">
+    <div class="modal fade" id="itemSingleUploadModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="itemSingleUploadCaption">Liste Görsel</h5>
+                    <button class="btn p-1" type="button" data-bs-dismiss="modal" id="itemSingleUploadModalCloseButton" aria-label="Close"><span class="fas fa-times fs-9"></span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body p-0">
+                        <div class="p-4">
+                            <input type="hidden" id="__sssCategoryID" />
+                            <div class="mb-3">
+                                <input class="form-control" id="listImageURL" type="file" />
+                            </div>
+                            <div class="card text-white overflow-hidden" id="listImageModalDiv">
+                                <img class="card-img-top" src="/img/generic/46.png" alt="" id="listImageModalSrc" />
+                                <div class="card-img-overlay d-flex align-items-end">
+                                    <div>
+                                        <h4 class="card-title text-white" id="listImageModalSubCaption"></h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary listImageAppButton" type="submit">Kaydet</button>
+                    <button class="btn btn-outline-danger" type="button" data-bs-dismiss="modal">İptal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script asp-append-version="true" src="/vendors/sweetalert2/sweetalert2.js"></script>
+    <script>
+
+        function itemCreate() {
+            let sssCategoryID = 0;
+            let sssCategoryName = $("#sssCategoryName").val();
+
+            let loopCount = 0, list = new Array(), iRow = 1;
+            let lang = "", translate = "";
+
+            $('.langCreateLoop').each(function () {
+                let langID = $(this).attr("data-lang");
+                let caption = $("#caption_" + langID).val();
+                let content = $("#content_" + langID).val();
+                let title = $("#title_" + langID).val();
+                let description = $("#description_" + langID).val();
+                let url = $("#url_" + langID).val();
+
+                if (caption != "")
+                    list.push(new langTabItem(langID, caption, null, content, title, description, null, url))
+                iRow++;
+            });
+
+            spinnerApp('saveButton');
+
+            $.ajax({
+                type: "POST",
+                url: "/sss-category-app",
+                data: { sssCategoryID: sssCategoryID, sssCategoryName: sssCategoryName, list: list },
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove('saveButton', "Kaydet");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                error: function () {
+                    spinnerRemove('saveButton', "Kaydet");
+                    newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.", "error");
+                }
+            });
+        }
+
+        function itemGet(sssCategoryID) {
+            $.ajax({
+                type: "Get",
+                url: "/sss-category-get",
+                data: { sssCategoryID: sssCategoryID },
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    $('.langCreateLoop').each(function (index, element) {
+                        let langID = $(this).attr("data-lang");
+
+                        $("#caption_" + langID).val("");
+                        $("#title_" + langID).val("");
+                        $("#description_" + langID).val("");
+                        $("#url_" + langID).val("");
+                    });
+
+                    $('.langUpdateLoop').each(function (index, element) {
+                        let langID = $(this).attr("data-lang");
+
+                        $("#_caption_" + langID).val("");
+                        $("#_title_" + langID).val("");
+                        $("#_description_" + langID).val("");
+                        $("#_url_" + langID).val("");
+                    });
+
+                    if (result.item1 != null) {
+                        $("#_sssCategoryID").val(result.item1.sssCategoryID)
+                        $("#_sssCategoryName").val(result.item1.categoryName)
+                    }
+
+                    if (result.item2.length > 0) {
+                        $.each(result.item2, function (i, item) {
+                            $("#_caption_" + item.langID).val(item.categorySubName);
+                            $("#_title_" + item.langID).val(item.title);
+                            $("#_description_" + item.langID).val(item.description);
+                            $("#_url_" + item.langID).val(item.url);
+                        });
+                    }
+                },
+                error: function () { alert("Hata") }
+            });
+        }
+
+        function itemUpdate() {
+            let sssCategoryID = $("#_sssCategoryID").val();
+            let sssCategoryName = $("#_sssCategoryName").val();
+
+            let loopCount = 0, list = new Array(), iRow = 1;
+            let lang = "", translate = "";
+
+            $('.langUpdateLoop').each(function () {
+                let langID = $(this).attr("data-lang");
+                let caption = $("#_caption_" + langID).val();
+                let content = $("#_content_" + langID).val();
+                let title = $("#_title_" + langID).val();
+                let description = $("#_description_" + langID).val();
+                let url = $("#_url_" + langID).val();
+
+                list.push(new langTabItem(langID, caption, null, content, title, description, null, url))
+            });
+
+            spinnerApp('saveButton');
+
+            $.ajax({
+                type: "POST",
+                url: "/sss-category-app",
+                data: { sssCategoryID: sssCategoryID, sssCategoryName: sssCategoryName, list: list },
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove('saveButton', "Kaydet");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                error: function () {
+                    spinnerRemove('saveButton', "Kaydet");
+                    newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.", "error");
+                }
+            });
+        }
+
+
+        function listImageGet(sssCategoryID, sssCategoryName, imageURL) {
+            $("#__sssCategoryID").val(sssCategoryID);
+            $("#itemSingleUploadCaption").html("Liste Görsel (" + sssCategoryName + ")");
+
+            if (imageURL != "") {
+                $("#listImageModalDiv").removeClass("d-none");
+                $("#listImageModalSrc").attr("src", "@cdnURL" + imageURL)
+                $("#listImageModalSrc").attr("alt", sssCategoryName)
+                $("#listImageModalSubCaption").html(sssCategoryName)
+            }
+            else {
+                $("#listImageModalDiv").addClass("d-none");
+                $("#listImageModalSrc").attr("src", "")
+                $("#listImageModalSrc").attr("alt", "")
+                $("#listImageModalSubCaption").html("")
+            }
+        }
+
+        function listImageApp() {
+            var sssCategoryID = $("#__sssCategoryID").val();
+            var listImageURL = $('#listImageURL')[0].files;
+
+            var model = new FormData();
+            model.append('sssCategoryID', sssCategoryID);
+            model.append('listImageURL', listImageURL[0]);
+
+            spinnerApp("listImageAppButton")
+
+            $.ajax({
+                type: "POST",
+                url: "/sss-category-image-app",
+                data: model,
+                datatype: "html",
+                processData: false,
+                contentType: false,
+                success: function (result) {
+                    if (result.resultType === 1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove('listImageAppButton', "Kaydet");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                error: function () {
+                    spinnerRemove('listImageAppButton', "Kaydet");
+                    newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.", "error");
+                }
+            });
+        }
+
+
+        function isActiveUpdate(sssCategoryID, checkID) {
+            $.ajax({
+                type: "POST",
+                url: "/sss-category-process",
+                data: { processType: 1, sssCategoryID: sssCategoryID },
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1) {
+                        newToast(result.resultCaption, result.resultMessage, "success");
+                    }
+                    else {
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                        checkReturn(checkID);
+                    }
+                },
+                error: function () {
+                    newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.", "error");
+                    checkReturn(checkID);
+                }
+            });
+        }
+
+        function arrangementUpdate() {
+            let arrangementBody = "";
+            spinnerApp('arrangementButton');
+
+            $('.arrangementCls').each(function () {
+                arrangementBody += $(this).attr("data-id") + "," + $(this).val() + "_";
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "/sss-category-arrangement-update",
+                data: { arrangementBody: arrangementBody },
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove('arrangementButton', "Sıralama Güncelle");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                error: function () {
+                    spinnerRemove('arrangementButton', "Sıralama Güncelle");
+                    newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.", "error");
+                }
+            });
+        }
+
+        function itemDelete(sssCategoryID) {
+            Swal.fire({
+                title: 'Uyarı',
+                text: "Kayıt Silinecek Emin misiniz?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet',
+                cancelButtonText: 'Hayır',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            }).then(function (result) {
+                if (result.value) {
+                    spinnerApp('swal2-confirm');
+                    $.ajax({
+                        type: "POST",
+                        url: "/sss-category-process",
+                        data: { processType: 2, sssCategoryID: sssCategoryID },
+                        datatype: "html",
+                        success: function (result) {
+                            spinnerRemove('swal2-confirm', 'Evet');
+                            if (result.resultType === 1)
+                                window.location.reload();
+                            else {
+                                spinnerRemove('swal2-confirm', 'Evet');
+                                newToast("Hata", result);
+                            }
+                        },
+                        error: function () {
+                            spinnerRemove('swal2-confirm', 'Evet');
+                            newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.");
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.fire({
+                        title: 'Uyarı',
+                        text: 'İşlemi iptal ettiniz.',
+                        icon: 'error',
+                        customClass: { confirmButton: 'btn btn-primary' }
+                    });
+                }
+            });
+        }
+
+    </script>
+}

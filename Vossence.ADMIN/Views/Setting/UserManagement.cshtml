@@ -1,0 +1,371 @@
+﻿@model Tuple<List<Cls.UserList>, string>
+
+@{
+    string checkCls = "", loginTypeName = "";
+    int iRow = 1;
+}
+
+@section Styles {
+    <link rel="stylesheet" asp-append-version="true" href="/vendors/sweetalert2/sweetalert2.css" />
+}
+
+<div class="mt-4">
+    <div class="row g-4">
+        <div class="col-12 col-xl-12 order-1 order-xl-0">
+            <div class="mb-9">
+                <div class="card shadow-none border mb-3" data-component-card="data-component-card">
+                    <div class="card-header p-4 border-bottom bg-body">
+                        <div class="row g-3 justify-content-between align-items-center">
+                            <div class="col-md-9"><h4 class="text-body mb-0">Kullanıcı Yönetimi</h4></div>
+                            <div class="col-md-3 text-end"><a class="btn btn-sm btn-success code-btn ms-2 fw-light collapsed" data-bs-target="#userCreateCanvas" data-bs-toggle="offcanvas">Yeni</a></div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-4 code-to-copy">
+
+
+                            <div id="users" data-list='{"valueNames":["system", "emailAddress", "nameSurname", "phoneNumber"],"page":10,"pagination":true}'>
+                                <div class="mb-4">
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="search-box"><form class="position-relative"><input class="form-control search-input search" type="search" placeholder="Aranacak Terim" aria-label="Aranacak Terim" /><span class="fas fa-search search-box-icon"></span></form></div>
+                                    </div>
+                                </div>
+                                <div class="bg-body-emphasis border-top border-bottom border-translucent position-relative top-1">
+                                    <div class="table-responsive scrollbar mx-n1 px-1">
+                                        <table class="table fs-9 mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="white-space-nowrap align-middle ps-4" scope="col">#</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 sort" scope="col" data-sort="system">Sistem</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 sort" scope="col" data-sort="emailAddress">Mail Adresi</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 sort" scope="col" data-sort="nameSurname">Ad Soyad</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 sort" scope="col" data-sort="phoneNumber">Telefon Numarası</th>
+                                                    <th class="white-space-nowrap align-middle ps-4" scope="col">Durum</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-end" scope="col">İşlemler</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="list" id="products-table-body">
+                                                @if (Model.Item1.Count() > 0)
+                                                {
+                                                    foreach (var item in Model.Item1)
+                                                    {
+                                                        checkCls = item.lockoutEnabled == true ? "checked" : "";
+                                                        loginTypeName = item.loginType == 1 ? "Admin" : item.loginType == 2 ? "Son Kullanıcı" : "##DEVOPS##";
+
+                                                        <tr class="position-static">
+                                                            <td class="align-middle ps-4">@iRow</td>
+                                                            <td class="system align-middle ps-4">@loginTypeName</td>
+                                                            <td class="emailAddress align-middle ps-4">@item.email</td>
+                                                            <td class="nameSurname align-middle ps-4">@item.nameSurname</td>
+                                                            <td class="phoneNumber align-middle ps-4">@item.phone</td>
+                                                            <td class="align-middle ps-4">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" onchange="isActiveUpdate('@item.userID', 'user_@item.userID')" id="user_@item.userID" type="checkbox" @checkCls />
+                                                                    <label class="form-check-label" for="user_@item.userID"></label>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-end">
+                                                                <a class="btn btn-primary btn-sm btn-icon d-inline p-2" data-bs-toggle="offcanvas" data-bs-target="#userUpdateCanvas" onclick="userGet('@item.userID', '@item.userName','@item.email')"><i class="fa fa-edit"></i></a>
+                                                                <a class="btn btn-warning btn-sm btn-icon d-inline p-2" data-bs-toggle="offcanvas" data-bs-target="#passwordUpdateCanvas" onclick="$('#passwordEmail').val('@item.email')"><i class="fa fa-lock"></i></a>
+                                                                <a class="btn btn-danger btn-sm btn-icon d-inline p-2" onclick="userDelete('@item.userID')"><i class="fa fa-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+
+                                                        iRow++;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr class="position-static">
+                                                        <td class="align-middle ps-4 text-center" colspan="7">Kayıt Bulunamadı</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row align-items-center justify-content-between py-2 pe-0 fs-9">
+                                        <div class="col-auto d-flex"><p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p></div>
+                                        <div class="col-auto d-flex"><button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button><ul class="mb-0 pagination"></ul><button class="page-link pe-0" data-list-pagination="next"><span class="fas fa-chevron-right"></span></button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" id="userCreateCanvas" tabindex="-1" aria-labelledby="userCreateCanvasLabel">
+    <div class="offcanvas-header">
+        <h5 id="userCreateCanvasLabel">Kullanıcı Oluştur</h5>
+        <button class="btn-close text-reset" type="button" id="userCreateCanvasCloseButton" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <hr />
+    <div class="offcanvas-body">
+        <form action="javascript:userCreate()" method="post" autocomplete="off">
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="userEmailAddress">Mail Adresi</label>
+                <div class="col-sm-8"><input class="form-control" id="userEmailAddress" type="email" placeholder="Mail Adresi Giriniz" maxlength="50" required /></div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="userPassword">Şifre</label>
+                <div class="col-sm-8"><input class="form-control" id="userPassword" type="password" placeholder="Şifre Giriniz" maxlength="50" required /></div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="userNameSurname">Ad Soyad</label>
+                <div class="col-sm-8"><input class="form-control" id="userNameSurname" type="text" placeholder="Ad Soyad Giriniz" maxlength="50" required /></div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="userPhoneNumber">Telefon</label>
+                <div class="col-sm-8"><input class="form-control" id="userPhoneNumber" type="text" placeholder="Telefon Numarası Giriniz" maxlength="50" required /></div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="loginType">Kullanıcı Tip</label>
+                <div class="col-sm-8">
+                    <select class="form-select" id="loginType" required>
+                        <option value="1">Admin</option>
+                        <option value="2">Son Kullanıcı</option>
+                    </select>
+                </div>
+            </div>
+            <hr />
+            <div class="row g-3 justify-content-between align-items-center">
+                <div class="col-12 col-md text-end">
+                    <button class="btn btn-success createButton">Kaydet</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" id="userUpdateCanvas" tabindex="-1" aria-labelledby="userUpdateCanvasLabel">
+    <div class="offcanvas-header">
+        <h5 id="userUpdateCanvasLabel">Kullanıcı Güncelle</h5>
+        <button class="btn-close text-reset" type="button" id="userUpdateCanvasCloseButton" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <hr />
+    <div class="offcanvas-body">
+        <form action="javascript:userUpdate()" method="post" autocomplete="off">
+            <input type="hidden" id="_userID" />
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="_userEmailAddress">Mail Adresi</label>
+                <div class="col-sm-8"><input class="form-control" id="_userEmailAddress" type="email" disabled placeholder="Mail Adresi Giriniz" maxlength="50" required /></div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="_userNameSurname">Ad Soyad</label>
+                <div class="col-sm-8"><input class="form-control" id="_userNameSurname" type="text" placeholder="Ad Soyad Giriniz" maxlength="50" required /></div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="_userPhoneNumber">Telefon</label>
+                <div class="col-sm-8"><input class="form-control" id="_userPhoneNumber" type="text" placeholder="Telefon Numarası Giriniz" maxlength="50" required /></div>
+            </div>
+            <hr />
+            <div class="row g-3 justify-content-between align-items-center">
+                <div class="col-12 col-md text-end">
+                    <button class="btn btn-success updateButton">Güncelle</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" id="passwordUpdateCanvas" tabindex="-1" aria-labelledby="passwordUpdateCanvasLabel">
+    <div class="offcanvas-header">
+        <h5 id="passwordUpdateCanvasLabel">Şifre Güncelle</h5>
+        <button class="btn-close text-reset" type="button" id="passwordUpdateCanvasCloseButton" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <hr />
+    <div class="offcanvas-body">
+        <form action="javascript:userPasswordReset()" method="post" autocomplete="off">
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="passwordEmail">Mail Adresi</label>
+                <div class="col-sm-8"><input class="form-control" id="passwordEmail" type="email" disabled placeholder="Mail Adresi Giriniz" maxlength="50" required /></div>
+            </div>
+            <div class="row mb-2">
+                <label class="col-sm-4 col-form-label" for="passwordReset">Şifre</label>
+                <div class="col-sm-8"><input class="form-control" id="passwordReset" type="password" placeholder="Şifre Giriniz" maxlength="50" required /></div>
+            </div>
+            <hr />
+            <div class="row g-3 justify-content-between align-items-center">
+                <div class="col-12 col-md text-end">
+                    <button class="btn btn-success passwordButton">Kaydet</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script asp-append-version="true" src="/vendors/sweetalert2/sweetalert2.js"></script>
+    <script>
+
+        function userCreate() {
+            let userNameSurname = $("#userNameSurname").val();
+            let userEmailAddress = $("#userEmailAddress").val();
+            let userPassword = $("#userPassword").val();
+            let userPhoneNumber = $("#userPhoneNumber").val();
+            let loginType = $("#loginType").val();
+
+            spinnerApp('createButton');
+
+            $.ajax({
+                type: "POST",
+                url: "/user-create",
+                data:
+                {
+                    userNameSurname: userNameSurname,
+                    userEmailAddress: userEmailAddress,
+                    userPassword: userPassword,
+                    userPhoneNumber: userPhoneNumber,
+                    loginType: loginType
+                },
+                datatype: "html",
+                success: function (result) {
+                    window.location.reload()
+                },
+                error: function () {
+                    $("#userCreateCanvasCloseButton").click();
+                    spinnerRemove('createButton', "Kaydet");
+                    newToast("Başarısız", "Kayıt Oluşturulamadı!", "error");
+                }
+            });
+        }
+
+        function userGet(userID, userName, userEmailAddress) {
+            $.ajax({
+                type: "Get",
+                url: "/user-detail-get",
+                data: { userID: userID, userName: userName, userEmailAddress: userEmailAddress },
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    $("#_userID").val(result.userID);
+                    $("#_userEmailAddress").val(result.userEmailAddress);
+                    $("#_userNameSurname").val(result.nameSurname);
+                    $("#_userPhoneNumber").val(result.phoneNumber);
+                },
+                error: function () {
+                    newToast("Uyarı", "Kullanıcı Bulunamadı!", "error");
+                }
+            });
+        }
+
+        function userUpdate() {
+            var userID = $("#_userID").val();
+            var nameSurname = $("#_userNameSurname").val();
+            var phoneNumber = $("#_userPhoneNumber").val();
+
+            spinnerApp('updateButton');
+
+            $.ajax({
+                type: "POST",
+                url: "/user-detail-update",
+                data: { userID: userID, nameSurname: nameSurname, phoneNumber: phoneNumber },
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType == 1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove('updateButton', 'Güncelle');
+                        newToast(result.resultCaption, result.resultMessage);
+                    }
+                },
+                error: function () {
+                    spinnerRemove('updateButton', 'Güncelle');
+                    newToast("Hata", "Kullanıcı Güncelleltirilemedi!", "error");
+                }
+            });
+        }
+
+        function isActiveUpdate(userID, checkID) {
+            $.ajax({
+                type: "POST",
+                url: "/user-locked-change",
+                data: { userID: userID },
+                datatype: "html",
+                success: function (result) {
+                    newToast(result.resultCaption, result.resultMessage);
+                },
+                error: function () {
+                    newToast("Hata", "Kayıt Bulunamadı", "error");
+                }
+            });
+        }
+
+        function userPasswordReset() {
+            var passwordEmail = $("#passwordEmail").val();
+            var passwordReset = $("#passwordReset").val();
+
+            spinnerApp('passwordButton');
+
+            $.ajax({
+                type: "POST",
+                url: "/user-password-update",
+                data: { passwordEmail: passwordEmail, passwordReset: passwordReset },
+                datatype: "html",
+                success: function (result) {
+                    spinnerRemove('passwordButton', 'Güncelle');
+                    if (result.resultType == 1) {
+                        $("#passwordUpdateCanvasCloseButton").click();
+                        newToast(result.resultCaption, result.resultMessage);
+                    }
+                    else
+                        newToast(result.resultCaption, result.resultMessage);
+                },
+                error: function () {
+                    spinnerRemove('passwordButton', 'Güncelle');
+                    newToast("Hata", "Şifre Güncellemesi Yapılamadı!", "error");
+                }
+            });
+        }
+
+        function userDelete(userID) {
+            Swal.fire({
+                title: 'Uyarı',
+                text: "Kullanıcıyı silmek istediğinize emin misiniz?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet',
+                cancelButtonText: 'Hayır',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            }).then(function (result) {
+                if (result.value) {
+                    spinnerApp('swal2-confirm');
+                    $.ajax({
+                        type: "POST",
+                        url: "/user-delete",
+                        data: { userID: userID },
+                        datatype: "html",
+                        success: function (result) {
+                            spinnerRemove('swal2-confirm', 'Evet');
+                            if (result.resultType === 1)
+                                window.location.reload();
+                            else {
+                                spinnerRemove('swal2-confirm', 'Hayır');
+                                newToast("Hata", result);
+                            }
+                        },
+                        error: function () {
+                            spinnerRemove('swal2-confirm', 'Silme');
+                            newToast("Hata", "Silme İşlemi Başarısız");
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.fire({
+                        title: 'Uyarı',
+                        text: 'Silme işlemi iptal edildi.',
+                        icon: 'error',
+                        customClass: { confirmButton: 'btn btn-primary' }
+                    });
+                }
+            });
+        }
+
+    </script>
+}
+
