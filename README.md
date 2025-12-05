@@ -79,10 +79,7 @@ Bu proje **Malik Uzunca** tarafından geliştirilmiştir.
 
 * **GitHub:** [@malikuzunca](https://github.com/malikuzunca)
 * **LinkedIn:** [@malikuzunca](https://www.linkedin.com/in/malikuzunca/)
-* **E-posta:** [gsmalikuzunca@outlook.com]
+* **E-posta:** gsmalikuzunca@outlook.com
 
 ---
 
-Bu README ile, bir işe alımcıya hem **iş hedefini (e-ticaret)** anladığınızı hem de **ileri düzey teknik kararlar (Dapper)** alabildiğinizi göstermiş olursunuz.
-
-Bu taslak üzerinde son bir düzenleme yapmak ister misiniz, yoksa bir sonraki adıma (örneğin bu projenin CV'de nasıl vurgulanacağı) geçelim mi?
