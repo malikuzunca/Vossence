@@ -126,26 +126,10 @@
                                            
                                         </td>
                                         <td class="colors align-middle review pb-2 ps-3" style="min-width:225px;">
-                                            @* @{
-                                                var colors = new List<string>();
-                                                if (!string.IsNullOrEmpty(item.ColorNames))
-                                                {
-                                                    colors = item.ColorNames.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
-                                                }
-                                            }
-                                            @foreach (var color in colors)
-                                            {
-                                                <a class="text-decoration-none" href="#!"><span class="badge badge-tag me-2 mb-2">@color</span></a>
-                                            } *@
                                             @{
-                                                // 1. Renk ID'lerini ve İsimlerini string'den List<string>'e ayırın.
-                                                // Lütfen item.ColorIDs ve item.ColorNames özellik adlarını kendi modelinizdeki
-                                                // doğru özellik adlarıyla kontrol edin.
+                                                
                                                 var colorIDs = item.ColorIDs?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>();
                                                 var colorNames = item.ColorNames?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>();
-
-                                                // 2. İki listeyi Zip metodu ile eşleştirin.
-                                                // Bu, ID'leri ve İsimleri sırayla eşleştirerek anonim bir koleksiyon oluşturur.
                                                 var combinedColors = colorIDs.Zip(colorNames, (id, name) => new
                                                 {
                                                     ID = id,
@@ -176,8 +160,9 @@
                                             <div class="btn-reveal-trigger position-static">
                                                 <button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal fs-10" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h fs-10"></span></button>
                                                 <div class="dropdown-menu dropdown-menu-end py-2">
-                                                    <a class="dropdown-item" type="button" data-bs-toggle="modal" onclick="colorGet(@item.ProductID); stockGet(@item.ProductID)" data-bs-target="#stockModal">Stock hareketleri</a>
-                                                    <a class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#priceModal">Fiyatlandırma</a>
+                                                    <a class="dropdown-item" type="button" data-bs-toggle="modal" onclick="getProductID(@item.ProductID)" data-bs-target="#stockModal">Stock hareketleri</a>
+                                                    <a class="dropdown-item" type="button" data-bs-toggle="modal" onclick="getProductID(@item.ProductID)" data-bs-target="#stockModalSales">Satış Yap</a>
+                                                    <a class="dropdown-item" type="button" data-bs-toggle="modal" onclick="getProductID(@item.ProductID)" data-bs-target="#priceModal">Fiyatlandırma</a>
                                                     <div class="dropdown-divider"></div><a class="dropdown-item text-danger" onclick="itemDelete(@item.ProductID)" href="#!">Kaldır</a>
                                                 </div>
                                             </div>
@@ -688,12 +673,6 @@
                             <div class="col-sm-6">
                                 <textarea class="form-control" id="message" placeholder="Not yazınız" style="height: 70px"></textarea>
                             </div>
-                            @* <div class="col-sm-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" id="isEntry" type="radio">
-                                    <label class="form-check-label" for="isEntry">Giriş</label>
-                                </div>
-                            </div> *@
                             <div class="col-sm">
                                 <button class="btn btn-primary saveButton" type="submit">Kaydet</button>
                             </div>
@@ -734,7 +713,71 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="stockModalSales" tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stockModalSalesLabel">Satış Ekranı</h5>
+                <button class="btn p-1" type="button" data-bs-dismiss="modal" aria-label="Close"><svg class="svg-inline--fa fa-xmark fs-9" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="xmark" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" data-fa-i2svg=""><path fill="currentColor" d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z"></path></svg><!-- <span class="fas fa-times fs-9"></span> Font Awesome fontawesome.com --></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex flex-column h-100">
+                    <h5 class="mb-3 text-body-highlight">Satış Bilgisi</h5>
+                    <form action="javascript:salesUpdate()" method="post" autocomplete="off">
+                        <div class="row g-3 flex-1 mb-4">
+                            <input class="hidden" type="hidden" id="___productID" />
+                            <input class="hidden" type="hidden" id="__stockID" />
+                            <div class="col-sm-6">
+                                <select class="form-select mb-3" id="__stockColors">
+                                    <option value="0">Renk seç</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+                                <input class="form-control" id="_stockQuantity" type="number" placeholder="Miktar" />
+                            </div>
+                            <div class="col-sm-12">
+                                <textarea class="form-control" id="_message" placeholder="Not yazınız" style="height: 70px"></textarea>
+                            </div>
+                            <div class="col-sm">
+                                <button class="btn btn-primary saveButton" type="submit">Onayla</button>
+                            </div>
+                        </div>
+                    </form>
 
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 200px;"></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-body-highlight fw-bold py-1">Ürün şu anda stokta:</td>
+                                <td class="text-body-tertiary fw-semibold py-1">
+                                    $1,090
+                                    <button class="btn p-0" type="button"><span class="fa-solid fa-rotate text-body ms-1" style="--phoenix-text-opacity: .6;"></span></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-body-highlight fw-bold py-1">Son stok yenileme tarihi:</td>
+                                <td class="text-body-tertiary fw-semibold py-1">30th June, 2021</td>
+                            </tr>
+                            <tr>
+                                <td class="text-body-highlight fw-bold py-1">Ömür boyu toplam stok:</td>
+                                <td class="text-body-tertiary fw-semibold py-1">20,000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @* <div class="modal-footer">
+                <button class="btn btn-primary" type="button">Okay</button>
+                <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Cancel</button>
+            </div> *@
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="priceModal" tabindex="-1" style="display: none;" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -744,14 +787,17 @@
             </div>
             <div class="modal-body">
                 <div class="d-flex flex-column h-100">
-                    <div class="row g-3 flex-1 mb-4">
-                        <div class="col-sm-7">
-                            <input class="form-control" id="salePrice" type="number" placeholder="Satış fiyatı" />
+                    <form action="javascript:priceUpdate()" method="post" autocomplete="off">
+                        <input type="hidden" id="priceProductID" />
+                        <div class="row g-3 flex-1 mb-4">
+                            <div class="col-sm-7">
+                                <input class="form-control" id="salePrice" type="number" placeholder="Satış fiyatı" />
+                            </div>
+                            <div class="col-sm">
+                                <button class="btn btn-primary saveButton" type="submit">Kaydet</button>
+                            </div>
                         </div>
-                        <div class="col-sm">
-                            <button class="btn btn-primary" type="button">Kaydet</button>
-                        </div>
-                    </div>
+                    </form>
                     <table>
                         <thead>
                             <tr>
@@ -944,14 +990,18 @@
                 }
                 if(result.item4 != null){
                     $("#_stockColors").empty();
+                    $("#__stockColors").empty();
                     $.each(result.item4, function (i, color) {
                         $("#_stockColors").append('<option value="' + color.colorID + '">' + color.colorName + '</option>');
+                        $("#__stockColors").append('<option value="' + color.colorID + '">' + color.colorName + '</option>');
                     });
                 }
                 if(result.item5 != null){
                      $("#_stockID").val("");
+                     $("#__stockID").val("");
                     $.each(result.item5, function (i, color) {
                         $("#_stockID").val(color.stockID);
+                        $("#__stockID").val(color.stockID);
                     });
                 }
                 },
@@ -962,9 +1012,11 @@
             
         }
 
-        function colorGet(productID){
+        function getProductID(productID){
             itemGet(productID);
             $("#__productID").val(productID);
+            $("#___productID").val(productID);
+            $("#priceProductID").val(productID);
         }
 
         function itemUpdate(){
@@ -1029,7 +1081,6 @@
             let quantity = $("#stockQuantity").val();
             let price = $("#stockPrice").val();
             let message = $("#message").val();
-            // let isEntry = $("#isEntry").is(":checked") ? 1 : 0;
             if(stockID == ""){
                 stockID = 0;
             }
@@ -1045,6 +1096,70 @@
                     quantity: quantity,
                     price: price,
                     message: message
+                },
+                datatype: "html",
+                success: function (result){
+                    if(result.resultType ===1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove("saveButton", "Kaydet");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                 error: function () {
+                    spinnerRemove('saveButton', "Kaydet");
+                    newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.", "error");
+                }
+            })
+        }
+
+        function salesUpdate(){
+            let stockID = $("#__stockID").val();
+            let productID = $("#___productID").val();
+            let colorID = $("#__stockColors").val();
+            let quantity = $("#_stockQuantity").val();
+            let message = $("#_message").val();
+
+            spinnerApp("saveButton");
+
+            $.ajax({
+                type:"POST",
+                url: "/product-sales-process",
+                data: {
+                    stockID : stockID,
+                    productID : productID,
+                    colorID: colorID,
+                    quantity: quantity,
+                    message: message
+                },
+                datatype: "html",
+                success: function (result){
+                    if(result.resultType ===1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove("saveButton", "Kaydet");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                 error: function () {
+                    spinnerRemove('saveButton', "Kaydet");
+                    newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.", "error");
+                }
+            })
+        }
+
+        function priceUpdate(){
+            let salePrice = $("#salePrice").val();
+            let productID = $("#priceProductID").val();
+
+            spinnerApp("saveButton");
+
+            $.ajax({
+                type:"POST",
+                url: "/product-price-process",
+                data: {
+                    productID : productID,
+                    salePrice: salePrice
                 },
                 datatype: "html",
                 success: function (result){

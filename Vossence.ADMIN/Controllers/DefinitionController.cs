@@ -1,14 +1,15 @@
-﻿using Vossence.DATA.Identity;
+﻿using Dapper;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Drawing;
+using System.Text.RegularExpressions;
+using Vossence.DATA.Helper;
+using Vossence.DATA.Identity;
 using Vossence.DATA.ORM;
 using Vossence.DATA.Procedure;
 using Vossence.DATA.Table;
-using Dapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using System.Text.RegularExpressions;
-using System;
 using static Vossence.DATA.Validation.Cls;
-using Vossence.DATA.Helper;
 
 namespace Vossence.ADMIN.Controllers
 {
@@ -718,6 +719,60 @@ namespace Vossence.ADMIN.Controllers
             catch (Exception)
             {
                 await Log(false, "ProductStockProcess");
+                return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+            }
+        }
+        #endregion
+
+        #region Satış Stok Güncelleme
+
+        [Route("product-sales-process")]
+        [HttpPost]
+        public async Task<ResultModel> ProductSalesProcess()
+        {
+            IFormCollection model = Request.Form;
+
+            try
+            {
+
+                return await Task.FromResult(new ResultModel() { resultType = 1, resultCaption = "Başarılı", resultMessage = "Güncelleme Başarılı" });
+            }
+            catch (Exception)
+            {
+                await Log(false, "ProductSalesProcess");
+                return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+            }
+        }
+        #endregion
+
+        #region Fiyat Güncelleme
+
+        [Route("product-price-process")]
+        [HttpPost]
+        public async Task<ResultModel> ProductPriceProcess()
+        {
+            IFormCollection model = Request.Form;
+            int productID = Convert.ToInt32(FormRowGet(model, "productID"));
+            try
+            {
+                if (productID > 0)
+                {
+                    Task<ResultModel> priceTable = Task.FromResult(db.Insert<ResultModel>("SP_PriceCrud", new DynamicParameters(new Dictionary<string, object?>
+                    {
+                        { "@productID", productID },
+                        { "@price", FormRowGet(model, "salePrice") }
+                    })));
+                    if (priceTable.IsCompletedSuccessfully)
+                    {
+                        return await Task.FromResult(new ResultModel() { resultType = 1, resultCaption = "Başarılı", resultMessage = "Güncelleme Başarılı" });
+                    }
+                    else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Hata", resultMessage = "Bir hata oluştu lütfen sistem yöneticinize başvurun." });
+                }
+                else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+            }
+            catch (Exception)
+            {
+                await Log(false, "ProductPriceProcess");
                 return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
             }
         }
