@@ -1,28 +1,85 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: .NET CI/CD (Web ve Admin Dağıtımı)
 
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+        
     - name: Restore dependencies
       run: dotnet restore
+      
     - name: Build
       run: dotnet build --no-restore
+      
     - name: Test
       run: dotnet test --no-build --verbosity normal
+
+    - name: 🚀 Publish Web Project
+      
+      run: dotnet publish Vossence.WEB/Vossence.WEB.csproj -c Release -o ${{ github.workspace }}/publish_web
+      
+    - name: 🚀 Publish Admin Project
+      
+      run: dotnet publish Vossence.ADMIN/Vossence.ADMIN.csproj -c Release -o ${{ github.workspace }}/publish_admin
+      
+    - name: Upload Web Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: web-app-output
+        path: ${{ github.workspace }}/publish_web
+
+    - name: Upload Admin Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: admin-app-output
+        path: ${{ github.workspace }}/publish_admin
+
+  deploy_web:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Download Web Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: web-app-output
+        path: ./web_publish_output
+
+    - name: 🌐 FTP Deploy Web (vossence.com)
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.0 
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-directory: ${{ secrets.FTP_WEB_PATH }}
+        local-directory: ./web_publish_output/
+
+  deploy_admin:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Download Admin Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: admin-app-output
+        path: ./admin_publish_output
+
+    - name: 🧑‍💻 FTP Deploy Admin (admin.vossence.com)
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.0
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-directory: ${{ secrets.FTP_ADMIN_PATH }}
+        local-directory: ./admin_publish_output/
