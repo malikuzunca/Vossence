@@ -724,27 +724,6 @@ namespace Vossence.ADMIN.Controllers
         }
         #endregion
 
-        #region Satış Stok Güncelleme
-
-        [Route("product-sales-process")]
-        [HttpPost]
-        public async Task<ResultModel> ProductSalesProcess()
-        {
-            IFormCollection model = Request.Form;
-
-            try
-            {
-
-                return await Task.FromResult(new ResultModel() { resultType = 1, resultCaption = "Başarılı", resultMessage = "Güncelleme Başarılı" });
-            }
-            catch (Exception)
-            {
-                await Log(false, "ProductSalesProcess");
-                return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
-            }
-        }
-        #endregion
-
         #region Fiyat Güncelleme
 
         [Route("product-price-process")]
