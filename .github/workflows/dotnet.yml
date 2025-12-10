@@ -62,7 +62,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         server-directory: ${{ secrets.FTP_WEB_PATH }}
-        local-directory: ./web_publish_output
+        local-directory: ./web_publish_output/*
 
   deploy_admin:
     needs: build
@@ -82,4 +82,4 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         server-directory: ${{ secrets.FTP_ADMIN_PATH }}
-        local-directory: ./admin_publish_output
+        local-directory: ./admin_publish_output/*
