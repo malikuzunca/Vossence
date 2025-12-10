@@ -31,5 +31,6 @@ namespace Vossence.DATA.Procedure
         public string TagNames { get; set; }
         public string ColorNames { get; set; }
         public string CategoryName { get; set; }
+        public decimal SalesPrice { get; set; }
     }
 }

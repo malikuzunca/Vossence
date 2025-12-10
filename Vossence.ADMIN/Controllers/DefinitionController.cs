@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using System;
 using System.Drawing;
 using System.Text.RegularExpressions;
@@ -875,6 +876,203 @@ namespace Vossence.ADMIN.Controllers
                 return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Hata", resultMessage = "Bir hata oluştu lütfen sistem yöneticinize başvurun." });
             }
         }
+        #endregion
+
+        #endregion
+
+        #region Varyantlar
+
+        #region Liste
+
+        [Route("variant-management")]
+        public IActionResult VariantsManagement()
+        {
+            List<SP_Variants> colors = db.GetAll<SP_Variants>("SP_Variants", new DynamicParameters(new Dictionary<string, object>{ { "@variantType", 1 },{ "@variantID",-1} })).ToList();
+            List<SP_Variants> tags = db.GetAll<SP_Variants>("SP_Variants", new DynamicParameters(new Dictionary<string, object> { { "@variantType", 2 }, { "@variantID", -1 } })).ToList();
+
+            return View(Tuple.Create(colors, tags));
+        }
+
+        #endregion
+
+        #region Oluştur - Güncelle
+
+        [Route("variant-app")]
+        public async Task<ResultModel> VariantApp()
+        {
+            try
+            {
+                IFormCollection model = Request.Form;
+                
+                int variantType = Convert.ToInt32(FormRowGet(model, "variantType"));
+                int variantID = Convert.ToInt32(FormRowGet(model, "variantID"));
+
+                if (variantType == 1)
+                {
+                    if (variantID == 0)
+                    {
+                        Task<ResultModel> colorTable = Task.FromResult(db.Insert<ResultModel>("SP_VariantCrud", new DynamicParameters(new Dictionary<string, object?>
+                        {
+                            { "@processType", 1 },
+                            { "@rowType", 1 },
+                            { "@variantID", variantID },
+                            { "@variantName", FormRowGet(model, "variantName") }
+
+                        })));
+
+                        if (colorTable.IsCompletedSuccessfully)
+                        {
+                            return await Task.FromResult(new ResultModel() { resultType = 1, resultCaption = "Başarılı", resultMessage = "Güncelleme Başarılı" });
+                        }
+                        else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Hata", resultMessage = "Bir hata oluştu lütfen sistem yöneticinize başvurun." });
+                    } else if (variantID > 0) 
+                    {
+                        Task<ResultModel> colorTable = Task.FromResult(db.Insert<ResultModel>("SP_VariantCrud", new DynamicParameters(new Dictionary<string, object?>
+                        {
+                            { "@processType", 1 },
+                            { "@rowType", 2 },
+                            { "@variantID", variantID },
+                            { "@variantName", FormRowGet(model, "variantName") }
+
+                        })));
+
+                        if (colorTable.IsCompletedSuccessfully)
+                        {
+                            return await Task.FromResult(new ResultModel() { resultType = 1, resultCaption = "Başarılı", resultMessage = "Güncelleme Başarılı" });
+                        }
+                        else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Hata", resultMessage = "Bir hata oluştu lütfen sistem yöneticinize başvurun." });
+                    }
+                    else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı." });
+                }
+                else if (variantType == 2)
+                {
+                    if (variantID == 0)
+                    {
+                        Task<ResultModel> tagTable = Task.FromResult(db.Insert<ResultModel>("SP_VariantCrud", new DynamicParameters(new Dictionary<string, object?>
+                    {
+                        { "@processType", 2 },
+                        { "@rowType", 1 },
+                        { "@variantID", variantID },
+                        { "@variantName", FormRowGet(model, "variantName") }
+                    })));
+
+                        if (tagTable.IsCompletedSuccessfully)
+                        {
+                            return await Task.FromResult(new ResultModel() { resultType = 1, resultCaption = "Başarılı", resultMessage = "Güncelleme Başarılı" });
+                        }
+                        else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Hata", resultMessage = "Bir hata oluştu lütfen sistem yöneticinize başvurun." });
+                    }
+                    else if (variantID > 0) 
+                    {
+                        Task<ResultModel> tagTable = Task.FromResult(db.Insert<ResultModel>("SP_VariantCrud", new DynamicParameters(new Dictionary<string, object?>
+                    {
+                        { "@processType", 2 },
+                        { "@rowType", 2 },
+                        { "@variantID", variantID },
+                        { "@variantName", FormRowGet(model, "variantName") }
+                    })));
+
+                        if (tagTable.IsCompletedSuccessfully)
+                        {
+                            return await Task.FromResult(new ResultModel() { resultType = 1, resultCaption = "Başarılı", resultMessage = "Güncelleme Başarılı" });
+                        }
+                        else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Hata", resultMessage = "Bir hata oluştu lütfen sistem yöneticinize başvurun." });
+                    }
+                    else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+
+                }
+                else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+            }
+            catch (Exception)
+            {
+                await Log(false, "VariantApp");
+                return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Hata", resultMessage = "Bir hata oluştu lütfen sistem yöneticinize başvurun." });
+            }
+        }
+
+        #endregion
+
+        #region Durum ÖneÇıkan Güncelle - Sil
+
+        [Route("variant-process")]
+        [HttpPost]
+        public async Task<ResultModel> VariantProcess(int processType, int variantID, int variantType)
+        {
+            try
+            {
+                if (variantType == 1)
+                {
+                    tblColors? colorGet = db.QueryApp<tblColors>(string.Format("SELECT * FROM tblColors WHERE ColorID={0}", variantID)).FirstOrDefault();
+
+                    if (processType == 1)
+                    {   
+                        if (colorGet != null) 
+                        {
+                            int isActive = colorGet.IsActive == true ? 0 : 1;
+
+                            Task<ResultModel?> processApp = Task.FromResult(db.QueryApp<ResultModel>(string.Format("UPDATE tblColors SET IsActive= {1} WHERE ColorID={0}", colorGet.ColorID, isActive)).FirstOrDefault());
+
+                            await Log(processApp.IsCompletedSuccessfully, "VariantProcess");
+                            if (processApp.IsCompletedSuccessfully)
+                                return await Task.FromResult(new ResultModel() { resultType = 1, resultCaption = "Başarılı", resultMessage = "Başarılı Güncelleme" });
+                            else
+                                return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+                        }
+                        else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+                    }
+                    else if (processType == 2)
+                    {
+                        Task<ResultModel?> processApp = Task.FromResult(db.QueryApp<ResultModel>(string.Format("UPDATE tblColors SET Deleted = 1 WHERE ColorID={0}", colorGet.ColorID)).FirstOrDefault());
+
+                        await Log(processApp.IsCompletedSuccessfully, "VariantProcess");
+                        if (processApp.IsCompletedSuccessfully)
+                            return await Task.FromResult(new ResultModel() { resultType = 1, resultCaption = "Başarılı", resultMessage = "Başarılı Güncelleme" });
+                        else
+                            return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+                    }
+                    else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+                }
+                else if (variantType == 2) 
+                {
+                    tblTags? tagGet = db.QueryApp<tblTags>(string.Format("SELECT * FROM tblTags WHERE TagID = {0}",variantID)).FirstOrDefault();
+                    if (processType == 1)
+                    {
+                        if (tagGet != null)
+                        {
+                            int isActive = tagGet.IsActive == true ? 0 : 1;
+
+                            Task<ResultModel?> processApp = Task.FromResult(db.QueryApp<ResultModel>(string.Format("UPDATE tblTags SET IsActive= {1} WHERE TagID={0}", tagGet.TagID, isActive)).FirstOrDefault());
+
+                            await Log(processApp.IsCompletedSuccessfully, "VariantProcess");
+                            if (processApp.IsCompletedSuccessfully)
+                                return await Task.FromResult(new ResultModel() { resultType = 1, resultCaption = "Başarılı", resultMessage = "Başarılı Güncelleme" });
+                            else
+                                return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+                        }
+                        else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+                    }
+                    else if (processType == 2)
+                    {
+                        Task<ResultModel?> processApp = Task.FromResult(db.QueryApp<ResultModel>(string.Format("UPDATE tblTags SET Deleted = 1 WHERE TagID={0}", tagGet.TagID)).FirstOrDefault());
+
+                        await Log(processApp.IsCompletedSuccessfully, "VariantProcess");
+                        if (processApp.IsCompletedSuccessfully)
+                            return await Task.FromResult(new ResultModel() { resultType = 1, resultCaption = "Başarılı", resultMessage = "Başarılı Güncelleme" });
+                        else
+                            return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+                    }
+                    return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+
+                }
+                else return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+            }
+            catch (Exception)
+            {
+                await Log(false, "VariantProcess");
+                return await Task.FromResult(new ResultModel() { resultType = 0, resultCaption = "Uyarı", resultMessage = "Kayıt Bulunamadı" });
+            }
+        }
+
         #endregion
 
         #endregion

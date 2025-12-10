@@ -12,5 +12,7 @@ namespace Vossence.DATA.Table
         [Key]
         public int ColorID { get; set; }
         public string ColorName { get; set; }
+        public bool IsActive { get; set; }
+        public bool Deleted { get; set; }
     }
 }

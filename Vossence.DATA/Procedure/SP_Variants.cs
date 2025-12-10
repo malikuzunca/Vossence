@@ -4,15 +4,17 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Vossence.DATA.Table;
 
-namespace Vossence.DATA.Table
+namespace Vossence.DATA.Procedure
 {
-    public class tblTags
+    public class SP_Variants
     {
         [Key]
-        public int TagID { get; set; }
-        public string TagName { get; set; }
+        public int VariantID { get; set; }
+        public string? VariantName { get; set; }
         public bool IsActive { get; set; }
         public bool Deleted { get; set; }
+
     }
 }

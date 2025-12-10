@@ -1,0 +1,393 @@
+﻿@model Tuple<List<SP_Variants>, List<SP_Variants>>
+
+@{
+    string pathURL = Context.Request.Path.ToString().StartsWith("/") ? Context.Request.Path.ToString().Remove(0, 1) : Context.Request.Path.ToString();
+    string cdnURL = ViewBag.CdnURL;
+    string topTabCls = "", subTabCls = "", required = "", checkCls = "", checkCls2 = "", catName = "";
+    string proCodeStart = ViewBag.ProductCodeStart;
+
+    int topTabRow = 1, subTabRow = 1, iRow = 1;
+    bool topTabSelected = false;
+}
+
+@{
+    <link rel="stylesheet" asp-append-version="true" href="/vendors/sweetalert2/sweetalert2.css" />
+}
+
+<div class="mt-4">
+    <div class="row g-4">
+        <div class="col-md-6 order-1 order-md-0">
+            <div class="mb-9">
+                <div class="card shadow-none border mb-3" data-component-card="data-component-card">
+                    <div class="card-header p-4 border-bottom bg-body">
+                        <div class="row g-3 justify-content-between align-items-center">
+                            <div class="col-md-9"><h4 class="text-body mb-0">Renk Yönetimi</h4></div>
+                            <div class="col-md-3 text-end">
+                                <a class="btn btn-sm btn-success code-btn ms-2 fw-light collapsed" data-bs-target="#itemCreateModal" onclick="variantType(1)" data-bs-toggle="modal">Yeni</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-4 code-to-copy">
+                            <div id="colors-variants" data-list='{"valueNames":["colorName"],"page":20,"pagination":true}'>
+                                <div class="mb-4">
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="search-box"><form class="position-relative"><input class="form-control search-input search" type="search" placeholder="Aranacak Terim" aria-label="Aranacak Terim" /><span class="fas fa-search search-box-icon"></span></form></div>
+                                    </div>
+                                </div>
+                                <div class="bg-body-emphasis border-top border-bottom border-translucent position-relative top-1">
+                                    <div class="table-responsive scrollbar mx-n1 px-1">
+                                        <table class="table fs-9 mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="white-space-nowrap align-middle ps-4" scope="col">#</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 sort text-center" scope="col" data-sort="colorName">Renk</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-left" scope="col">Durum</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-end" scope="col">İşlemler</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="list" id="colors-table-body">
+                                                @if (Model.Item1.Count() > 0)
+                                                {
+                                                    foreach (var item in Model.Item1)
+                                                    {
+                                                        checkCls = item.IsActive ? "checked" : "";
+
+                                                        <tr>
+                                                            <td class="text-center align-middle">@item.VariantID</td>
+                                                            <td class="categoryName align-middle text-center">@item.VariantName</td>
+                                                            <td class="align-middle text-left">
+                                                                <div class="form-check form-switch mx-4">
+                                                                    <input class="form-check-input" onchange="isActiveUpdate('@item.VariantID', 'item_@item.VariantID', 1)" id="item_@item.VariantID" type="checkbox" @checkCls />
+                                                                    <label class="form-check-label" for="item_@item.VariantID"></label>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-end">
+                                                                <a class="btn btn-primary btn-sm btn-icon d-inline p-2" title="Güncelle" onclick="itemGet(@item.VariantID, 1)" data-bs-toggle="modal" data-bs-target="#itemUpdateModal"><i class="fa fa-edit"></i></a>
+                                                                <a class="btn btn-danger btn-sm btn-icon d-inline p-2" title="Sil" onclick="itemDelete(@item.VariantID,1)"><i class="fa fa-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+
+                                                        iRow++;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr class="position-static">
+                                                        <td class="align-middle ps-4 text-center" colspan="4">Kayıt Bulunamadı.</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row align-items-center justify-content-between py-2 pe-0 fs-9">
+                                        <div class="col-auto d-flex"><p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p></div>
+                                        <div class="col-auto d-flex"><button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button><ul class="mb-0 pagination"></ul><button class="page-link pe-0" data-list-pagination="next"><span class="fas fa-chevron-right"></span></button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 order-1 order-md-0">
+            <div class="mb-9">
+                <div class="card shadow-none border mb-3" data-component-card="data-component-card">
+                    <div class="card-header p-4 border-bottom bg-body">
+                        <div class="row g-3 justify-content-between align-items-center">
+                            <div class="col-md-9"><h4 class="text-body mb-0">Etiket Yönetimi</h4></div>
+                            <div class="col-md-3 text-end">
+                                <a class="btn btn-sm btn-success code-btn ms-2 fw-light collapsed" data-bs-target="#itemCreateModal" onclick="variantType(2)" data-bs-toggle="modal">Yeni</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-4 code-to-copy">
+                            <div id="tags-variants" data-list='{"valueNames":["tagName"],"page":20,"pagination":true}'>
+                                <div class="mb-4">
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="search-box"><form class="position-relative"><input class="form-control search-input search" type="search" placeholder="Aranacak Terim" aria-label="Aranacak Terim" /><span class="fas fa-search search-box-icon"></span></form></div>
+                                    </div>
+                                </div>
+                                <div class="bg-body-emphasis border-top border-bottom border-translucent position-relative top-1">
+                                    <div class="table-responsive scrollbar mx-n1 px-1">
+                                        <table class="table fs-9 mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="white-space-nowrap align-middle ps-4" scope="col">#</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 sort text-center" scope="col" data-sort="tagName">Etiket</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-left" scope="col">Durum</th>
+                                                    <th class="white-space-nowrap align-middle ps-4 text-end" scope="col">İşlemler</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="list" id="tags-table-body">
+                                                @if (Model.Item2.Count() > 0)
+                                                {
+                                                    foreach (var item in Model.Item2)
+                                                    {
+                                                        checkCls = item.IsActive ? "checked" : "";
+
+                                                        <tr>
+                                                            <td class="text-center align-middle">@item.VariantID</td>
+                                                            <td class="categoryName align-middle text-center">@item.VariantName</td>
+                                                            <td class="align-middle text-left">
+                                                                <div class="form-check form-switch mx-4">
+                                                                    <input class="form-check-input" onchange="isActiveUpdate('@item.VariantID', 'item_@item.VariantID',2)" id="item_@item.VariantID" type="checkbox" @checkCls />
+                                                                    <label class="form-check-label" for="item_@item.VariantID"></label>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-end">
+                                                                <a class="btn btn-primary btn-sm btn-icon d-inline p-2" title="Güncelle" onclick="itemGet(@item.VariantID, 2)" data-bs-toggle="modal" data-bs-target="#itemUpdateModal"><i class="fa fa-edit"></i></a>
+                                                                <a class="btn btn-danger btn-sm btn-icon d-inline p-2" title="Sil" onclick="itemDelete(@item.VariantID, 2)"><i class="fa fa-trash"></i></a>
+                                                            </td>
+                                                        </tr>
+
+                                                        iRow++;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr class="position-static">
+                                                        <td class="align-middle ps-4 text-center" colspan="4">Kayıt Bulunamadı.</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row align-items-center justify-content-between py-2 pe-0 fs-9">
+                                        <div class="col-auto d-flex"><p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p></div>
+                                        <div class="col-auto d-flex"><button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button><ul class="mb-0 pagination"></ul><button class="page-link pe-0" data-list-pagination="next"><span class="fas fa-chevron-right"></span></button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<form action="javascript:itemCreate()" method="post" autocomplete="off">
+    <div class="modal fade" id="itemCreateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Varyant Oluştur</h5>
+                    <button class="btn p-1" type="button" data-bs-dismiss="modal" id="itemCreateModalCloseButton" aria-label="Close"><span class="fas fa-times fs-9"></span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body p-0">
+                        <div class="p-4">
+                            <div class="mb-3 row">
+                                <div class="col-md-12">
+                                    <div class="row g-3 mb-3">
+                                        <input type="hidden" id="variantType" />
+                                        <div class="col-md-12">
+                                            <div class="form-floating mb-3">
+                                                <input class="form-control" id="variantName" type="text" placeholder="Varyant giriniz" maxlength="200" required />
+                                                <label for="variantName">Varyant Adı</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary saveButton" type="submit">Kaydet</button>
+                    <button class="btn btn-outline-danger" type="button" data-bs-dismiss="modal">İptal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form action="javascript:itemUpdate()" method="post" autocomplete="off">
+    <div class="modal fade" id="itemUpdateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Varyant Güncelle</h5>
+                    <button class="btn p-1" type="button" data-bs-dismiss="modal" id="itemUpdateModalCloseButton" aria-label="Close"><span class="fas fa-times fs-9"></span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body p-0">
+                        <div class="p-4">
+                            <div class="mb-3 row">
+                                <div class="col-md-12">
+                                    <div class="row g-3 mb-3">
+                                        <input type="hidden" id="_variantType" />
+                                        <input type="hidden" id="_variantID" />
+                                        <div class="col-md-12">
+                                            <div class="form-floating mb-3">
+                                                <input class="form-control" id="_variantName" type="text" placeholder="Varyant Giriniz" maxlength="200" required />
+                                                <label for="_variantName">Renk Adı</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary saveButton" type="submit">Kaydet</button>
+                    <button class="btn btn-outline-danger" type="button" data-bs-dismiss="modal">İptal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script asp-append-version="true" src="/vendors/sweetalert2/sweetalert2.js"></script>
+    <script>
+
+        function variantType(variantType) {
+            $("#variantType").val(variantType);
+        }
+
+        function itemCreate() {
+            let variantID = 0;
+            let variantName = $("#variantName").val();
+            let variantTpye = $("#variantType").val();
+       
+            spinnerApp('saveButton');
+
+            $.ajax({
+                type: "POST",
+                url: "/variant-app",
+                data: { variantID: variantID, variantName: variantName, variantTpye: variantTpye},
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove('saveButton', "Kaydet");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                error: function () {
+                    spinnerRemove('saveButton', "Kaydet");
+                    newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.", "error");
+                }
+            });
+        }
+
+        function itemGet(variantID, variantType) {
+            $.ajax({
+                type: "Get",
+                url: "/variant-get",
+                data: { variantID: variantID, variantType: variantType },
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+
+                    if (result != null) {
+                        $("#_variantID").val(result.variantID)
+                        $("#_variantName").val(result.variantName)
+                        $("#_variantType").val(variantType)
+                    }
+                },
+                error: function () { alert("Hata") }
+            });
+        }
+
+        function itemUpdate() {
+            let variantID = $("#_variantID").val();
+            let variantName = $("#_variantName").val();
+            let variantType = $("#_variantType").val();
+           
+            spinnerApp('saveButton');
+
+            $.ajax({
+                type: "POST",
+                url: "/variant-app",
+                data: { variantID: variantID, variantName: variantName, variantType: variantType},
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1)
+                        window.location.reload()
+                    else {
+                        spinnerRemove('saveButton', "Kaydet");
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                    }
+                },
+                error: function () {
+                    spinnerRemove('saveButton', "Kaydet");
+                    newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.", "error");
+                }
+            });
+        }
+
+        function isActiveUpdate(variantID, checkID, variantType) {
+            $.ajax({
+                type: "POST",
+                url: "/variant-process",
+                data: { processType: 1, variantID: variantID, variantType: variantType},
+                datatype: "html",
+                success: function (result) {
+                    if (result.resultType === 1) {
+                        newToast(result.resultCaption, result.resultMessage, "success");
+                    }
+                    else {
+                        newToast(result.resultCaption, result.resultMessage, "error");
+                        checkReturn(checkID);
+                    }
+                },
+                error: function () {
+                    newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.", "error");
+                    checkReturn(checkID);
+                }
+            });
+        }
+
+        function itemDelete(variantID, variantType) {
+            Swal.fire({
+                title: 'Uyarı',
+                text: "Kayıt Silinecek Emin misiniz?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet',
+                cancelButtonText: 'Hayır',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            }).then(function (result) {
+                if (result.value) {
+                    spinnerApp('swal2-confirm');
+                    $.ajax({
+                        type: "POST",
+                        url: "/variant-process",
+                        data: { processType: 2, variantID: variantID, variantType:variantType },
+                        datatype: "html",
+                        success: function (result) {
+                            spinnerRemove('swal2-confirm', 'Evet');
+                            if (result.resultType === 1)
+                                window.location.reload();
+                            else {
+                                spinnerRemove('swal2-confirm', 'Evet');
+                                newToast("Hata", result);
+                            }
+                        },
+                        error: function () {
+                            spinnerRemove('swal2-confirm', 'Evet');
+                            newToast("Hata", "Bir hata oluştu lütfen sistem yöneticinize başvurun.");
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.fire({
+                        title: 'Uyarı',
+                        text: 'İşlemi iptal ettiniz.',
+                        icon: 'error',
+                        customClass: { confirmButton: 'btn btn-primary' }
+                    });
+                }
+            });
+        }
+
+    </script>
+}

@@ -3,6 +3,7 @@ using Vossence.DATA.Procedure;
 using Vossence.DATA.Table;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 
 namespace Vossence.ADMIN.Controllers
 {
@@ -226,24 +227,6 @@ namespace Vossence.ADMIN.Controllers
 
                 tblProductMain? productMain = db.QueryApp<tblProductMain>(string.Format("SELECT * FROM tblProductMain WHERE ProductID={0}", productID)).FirstOrDefault();
                 tblProductContent? productContent = db.QueryApp<tblProductContent>(string.Format("SELECT * FROM tblProductContent WHERE ProductID={0}", productID)).FirstOrDefault();
-                //tblCategoryMain? categoryMain = db.QueryApp<tblCategoryMain>(string.Format("SELECT * FROM tblCategoryMain WHERE CategoryID={0}", productMain.CategoryID)).FirstOrDefault();
-                //tblCategoryMain? categorySubMain = db.QueryApp<tblCategoryMain>(string.Format("SELECT * FROM tblCategoryMain WHERE CategorySubID={0}", categoryMain.CategorySubID)).FirstOrDefault();
-                //tblCategoryMain? categoryMain = db.QueryApp<tblCategoryMain>($"SELECT * FROM tblCategoryMain WHERE CategoryID = {productMain.CategoryID}").FirstOrDefault();
-
-                //tblCategoryMain? categorySubMain = null;
-                //tblCategoryMain? categorySubSubMain = null;
-                //if (categoryMain?.CategorySubID != null)
-                //{
-                //    categorySubMain = db.QueryApp<tblCategoryMain>(
-                //        $"SELECT * FROM tblCategoryMain WHERE CategoryID = {categoryMain.CategorySubID}"
-                //    ).FirstOrDefault();
-                //}
-                //if (categorySubMain?.CategorySubID != null)
-                //{
-                //    categorySubSubMain = db.QueryApp<tblCategoryMain>(
-                //        $"SELECT * FROM tblCategoryMain WHERE CategoryID = {categorySubMain.CategorySubID}"
-                //    ).FirstOrDefault();
-                //}
                 List<tblTags> tagList = db.QueryApp<tblTags>(string.Format("SELECT T.TagID, T.TagName FROM tblProductMain PM LEFT JOIN tblProductTags PT ON PM.ProductID = PT.ProductID LEFT JOIN tblTags T ON PT.TagID = T.TagID WHERE PM.ProductID={0}", productMain.ProductID)).ToList();
                 List<tblColors> colorList = db.QueryApp<tblColors>(string.Format("SELECT C.ColorID, C.ColorName FROM tblProductMain PM LEFT JOIN tblProductColors PC ON PM.ProductID = PC.ProductID LEFT JOIN tblColors C ON PC.ColorID = C.ColorID WHERE PM.ProductID={0}", productMain.ProductID)).ToList();
                 List<tblStock> stockList = db.QueryApp<tblStock>(string.Format("SELECT * FROM tblStock WHERE ProductID={0}",productMain.ProductID)).ToList();
@@ -279,6 +262,38 @@ namespace Vossence.ADMIN.Controllers
             }
         }
         #endregion
-        
+
+        #region Variyant Getir
+
+        [HttpGet]
+        [Route("variant-get")]
+        public async Task<JsonResult>? VariantGet(int variantID, int variantType)
+        {
+            try
+            {
+                if (variantType == 1)
+                {
+                    SP_Variants? colorGet = db.GetAll<SP_Variants>("SP_Variants", new DynamicParameters(new Dictionary<string, object> { { "@variantType", 1 }, { "@variantID", variantID } })).FirstOrDefault();
+                    if (colorGet != null)
+                        return await Task.FromResult(Json(colorGet));
+
+                }
+                else if (variantType == 2)
+                {
+                    SP_Variants? tagGet = db.GetAll<SP_Variants>("SP_Variants", new DynamicParameters(new Dictionary<string, object> { { "@variantType", 2 }, { "@variantID", variantID } })).FirstOrDefault();
+                    if(tagGet !=null)
+                        return await Task.FromResult(Json(tagGet));
+
+                }
+                return await Task.FromResult(Json(null));
+            }
+            catch (Exception ex)
+            {
+                await Log(false, "VariantGet");
+                return await Task.FromResult(Json(ex));
+            }
+        }
+
+        #endregion
     }
 }
