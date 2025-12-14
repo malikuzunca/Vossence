@@ -252,14 +252,14 @@
         function itemCreate() {
             let variantID = 0;
             let variantName = $("#variantName").val();
-            let variantTpye = $("#variantType").val();
+            let variantType = $("#variantType").val();
        
             spinnerApp('saveButton');
 
             $.ajax({
                 type: "POST",
                 url: "/variant-app",
-                data: { variantID: variantID, variantName: variantName, variantTpye: variantTpye},
+                data: { variantID: variantID, variantName: variantName, variantType: variantType},
                 datatype: "html",
                 success: function (result) {
                     if (result.resultType === 1)
