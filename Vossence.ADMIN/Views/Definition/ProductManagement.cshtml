@@ -1,5 +1,5 @@
 ﻿@model Tuple<List<SP_Products> ,List<tblCategoryMain>, List<tblTags>, List<tblColors>, List<tblStock>>
-
+@using System.Globalization;
 @{
     string pathURL = Context.Request.Path.ToString().StartsWith("/") ? Context.Request.Path.ToString().Remove(0, 1) : Context.Request.Path.ToString();
     string cdnURL = ViewBag.CdnURL;
@@ -100,6 +100,8 @@
                             { 
                                 foreach(var item in Model.Item1)
                                 {
+                                    checkCls = item.IsActive ? "checked" : "";
+                                    checkCls2 = item.IsFeatured ? "checked" : "";
                                     <tr class="position-static">
                                         <td class="fs-9 align-middle">
                                            <input type="number" class="form-control form-control-sm w-100 arrangementCls text-center" data-id="@item.ProductID" value="@item.Arrangement" />
@@ -107,7 +109,7 @@
                                         <td class="time align-middle white-space-nowrap text-body-tertiary text-opacity-85 ps-4">@item.ProductCode</td>
                                         <td class="align-middle white-space-nowrap py-0"><img class="d-block border border-translucent rounded-2" src="@cdnURL/Vossence/Default/noImage.jpg" alt="@item.ProductName" width="53"></td>
                                         <td class="product align-middle ps-4"><a class="fw-semibold line-clamp-3 mb-0" onclick="itemGet(@item.ProductID)" data-bs-toggle="modal" data-bs-target="#itemUpdateModal">@item.ProductName</a></td>
-                                        <td class="price align-middle white-space-nowrap text-end fw-bold text-body-tertiary ps-4">@item.SalesPrice.ToString("C")</td>
+                                        <td class="price align-middle white-space-nowrap text-end fw-bold text-body-tertiary ps-4">@item.SalesPrice.ToString("C", new CultureInfo("tr-TR"))</td>
                                         <td class="category align-middle white-space-nowrap text-body-quaternary fs-9 ps-4 fw-semibold">@item.CategoryName</td>
                                         <td class="tags align-middle review pb-2 ps-3" style="min-width:200px;">
                                             @{

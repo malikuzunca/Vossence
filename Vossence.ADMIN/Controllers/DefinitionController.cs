@@ -1076,6 +1076,18 @@ namespace Vossence.ADMIN.Controllers
         #endregion
 
         #endregion
+
+        #region Manuel Satış Ekranı
+
+        [HttpGet]
+        [Route("manual-sale")]
+        public IActionResult ManualSales()
+        {
+            
+            return View();
+        }
+
+        #endregion
     }
 
 
