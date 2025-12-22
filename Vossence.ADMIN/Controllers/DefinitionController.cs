@@ -18,7 +18,7 @@ namespace Vossence.ADMIN.Controllers
     {
         private readonly IDapper db;
         private readonly IConfiguration? configuration;
-        private readonly UserManager<AppUser> userManager;
+        private readonly UserManager<AppUser> userManager; 
         private readonly RoleManager<AppRole> roleManager;
         private readonly SignInManager<AppUser> signManager;
 
