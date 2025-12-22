@@ -10,7 +10,7 @@ using static Vossence.DATA.Validation.Cls;
 namespace Vossence.ADMIN.Controllers
 {
     public class CmsController : SharedController
-    {
+    { 
         private readonly IDapper db;
         private readonly IConfiguration? configuration;
 
