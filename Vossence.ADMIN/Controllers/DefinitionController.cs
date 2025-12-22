@@ -15,7 +15,7 @@ using static Vossence.DATA.Validation.Cls;
 namespace Vossence.ADMIN.Controllers
 {
     public class DefinitionController : SharedController
-    {
+    { 
         private readonly IDapper db;
         private readonly IConfiguration? configuration;
         private readonly UserManager<AppUser> userManager; 
