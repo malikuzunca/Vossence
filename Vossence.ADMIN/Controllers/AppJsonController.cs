@@ -11,7 +11,7 @@ namespace Vossence.ADMIN.Controllers
     {
         private readonly IDapper db;
         private readonly IConfiguration? configuration;
-
+ 
         #region Ctor   
         public AppJsonController(IDapper dapper, IConfiguration? configuration, ILogger<SharedController> logger) : base(dapper, configuration, logger)
         {
