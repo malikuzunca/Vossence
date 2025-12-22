@@ -363,3 +363,10 @@ MigrationBackup/
 FodyWeavers.xsd
 /Vossence.ADMIN/appsettings.json
 /Vossence.WEB/appsettings.json
+# JetBrains Rider files
+.idea/
+*.sln.DotSettings.user
+
+# Build outputs
+bin/
+obj/
