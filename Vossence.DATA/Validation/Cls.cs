@@ -138,5 +138,20 @@ namespace Vossence.DATA.Validation
             public int countCms { get; set; }
         }
         #endregion
+
+        #region Cart Model
+
+        public class CartModel
+        {
+            public int ProductID { get; set; }
+            public string ProductName { get; set; }
+            public int ColorID { get; set; }
+            public string ColorName { get; set; }
+            public int Quantity { get; set; }
+            public decimal UnitPrice { get; set; }
+            public decimal TotalPrice { get; set; }
+        }
+
+        #endregion
     }
 }

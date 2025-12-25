@@ -16,8 +16,8 @@ namespace Vossence.DATA.Procedure
         public int SliderID { get; set; }
         public int Arrangement { get; set; }
         public int LangID { get; set; }
-        public int ColorIDs { get; set; }
-        public int TagIDs { get; set; }
+        public string? ColorIDs { get; set; }
+        public string? TagIDs { get; set; }
         public int TotalStock { get; set; }
         public string? ProductName { get; set; }
         public string? Description { get; set; }

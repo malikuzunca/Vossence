@@ -1,0 +1,114 @@
+@using System.Globalization
+@model Tuple<List<SP_AdminProducts>, List<SP_ProductColorStocks>>
+
+@{
+    string pathURL = Context.Request.Path.ToString().StartsWith("/") ? Context.Request.Path.ToString().Remove(0, 1) : Context.Request.Path.ToString();
+    string cdnURL = ViewBag.CdnURL;
+    string topTabCls = "", subTabCls = "", required = "", checkCls = "", checkCls2="";
+
+    int topTabRow = 1, subTabRow = 1, iRow = 1;
+    bool topTabSelected = false;
+}
+
+@{
+    <link rel="stylesheet" asp-append-version="true" href="/vendors/sweetalert2/sweetalert2.css" />
+}
+
+<div class="mt-4">
+    <div class="row g-4">
+        <div class="col-12 col-xl-12 order-1 order-xl-0">
+            <div class="mb-9">
+                <div class="card shadow-none border mb-3" data-component-card="data-component-card">
+                    <div class="card-header p-4 border-bottom bg-body"> 
+                        <div class="row g-3 justify-content-between align-items-center">
+                            <div class="col-md-9"><h4 class="text-body mb-0">Satış Yönetimi</h4></div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-4 code-to-copy">
+                            <div id="categories" data-list='{"valueNames":["prdCode", "productName"],"page":10,"pagination":true}'>
+                                <div class="mb-4">
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="search-box"><form class="position-relative"><input class="form-control search-input search" type="search" placeholder="Aranacak Terim" aria-label="Aranacak Terim" /><span class="fas fa-search search-box-icon"></span></form></div>
+                                    </div>
+                                </div>
+                                <div class="bg-body-emphasis border-top border-bottom border-translucent position-relative top-1">
+                                    <div class="table-responsive scrollbar mx-n1 px-1">
+                                        <table class="table fs-9 mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="white-space-nowrap align-middle sort ps-4" scope="col" data-sort="prdCode">Ürün Kodu</th>
+                                                    <th class="white-space-nowrap align-middle sort ps-4" scope="col" data-sort="productName">Ürün adı</th>
+                                                    <th class="white-space-nowrap align-middle sort ps-4" scope="col" data-sort="price">Fiyat</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="list" id="products-table-body">
+                                                @if (Model.Item1.Count() > 0)
+                                                {
+                                                    foreach (var item in Model.Item1)
+                                                    {
+                                                        <tr>
+                                                            <td class="prdCode">@item.ProductCode</td>
+                                                            <td class="productName">
+                                                                @item.ProductName
+                                                                <div class="d-flex flex-wrap gap-1">
+                                                                    @if(item.HasStock){
+                                                                        foreach (var color in Model.Item2)
+                                                                        {
+                                                                            if (item.ProductID == color.ProductID)
+                                                                            {
+                                                                                string bgColor = color.CurrentQuantity > 5 ? "text-bg-success" : 
+                                                                                    color.CurrentQuantity == 0 ? "text-bg-danger" : 
+                                                                                    "text-bg-warning";
+                                                                                <button
+                                                                                    class="badge @bgColor"
+                                                                                    @(color.CurrentQuantity == 0 ? "disabled" : "")
+                                                                                    onclick="addToCart(@item.ProductID, @color.ColorID, @item.SalesPrice)">
+                                                                                    @color.ColorName
+                                                                                        <small class="ms-1">
+                                                                                            (@color.CurrentQuantity)
+                                                                                        </small>
+                                                                                </button>
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <button class="badge text-bg-danger" disabled>
+                                                                            <small class="ms-1">Stok yok (0)</small>
+                                                                        </button>
+                                                                    }
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-end price">
+                                                                @item.SalesPrice.ToString("C", new CultureInfo("tr-TR"))
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr class="position-static">
+                                                        <td class="align-middle ps-4 text-center" colspan="3">Kayıt Bulunamadı.</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row align-items-center justify-content-between py-2 pe-0 fs-9">
+                                        <div class="col-auto d-flex"><p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p></div>
+                                        <div class="col-auto d-flex"><button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button><ul class="mb-0 pagination"></ul><button class="page-link pe-0" data-list-pagination="next"><span class="fas fa-chevron-right"></span></button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script asp-append-version="true" src="/vendors/sweetalert2/sweetalert2.js"></script>
+}
